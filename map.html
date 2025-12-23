@@ -27,26 +27,30 @@
     body{font-family:'DM Sans',-apple-system,sans-serif;background:var(--bg-primary);color:var(--text-primary);overflow:hidden;height:100vh;height:100dvh}
     .visually-hidden{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);border:0}
     button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{outline:3px solid var(--accent-trails);outline-offset:2px}
-    .top-bar{position:fixed;top:0;left:0;right:0;height:56px;background:rgba(26,26,26,.95);backdrop-filter:blur(10px);display:flex;align-items:center;justify-content:center;z-index:1000;border-bottom:1px solid var(--border-color)}
+    .top-bar{position:fixed;top:0;left:0;right:0;height:56px;background:rgba(26,26,26,.95);backdrop-filter:blur(10px);display:flex;align-items:center;justify-content:space-between;padding:0 16px;z-index:1000;border-bottom:1px solid var(--border-color)}
     .top-bar-brand{font-size:1.125rem;font-weight:600;display:flex;align-items:center;gap:8px}
+    .top-bar-user{display:flex;align-items:center;gap:8px;font-size:.875rem}
+    .user-avatar{width:32px;height:32px;background:var(--accent-trails);border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:600;font-size:.875rem;cursor:pointer}
+    .user-avatar.anonymous{background:var(--bg-tertiary);color:var(--text-muted)}
+    .user-name{color:var(--text-secondary);max-width:100px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
     #map{position:fixed;top:56px;left:0;right:0;bottom:64px;z-index:1}
-    .map-mode-toggle{position:fixed;top:70px;left:50%;transform:translateX(-50%);display:flex;background:rgba(26,26,26,.95);border-radius:25px;padding:4px;box-shadow:0 4px 20px rgba(0,0,0,.4);z-index:1000;backdrop-filter:blur(10px);border:1px solid var(--border-color)}
-    .mode-btn{display:flex;align-items:center;gap:6px;padding:10px 20px;border:none;background:transparent;color:var(--text-secondary);font-size:14px;font-weight:600;cursor:pointer;border-radius:21px;transition:all .25s}
-    .mode-btn:hover{color:var(--text-primary)}.mode-btn.active{color:var(--text-primary)}.mode-btn.active.trails{background:var(--accent-trails)}.mode-btn.active.urban{background:var(--accent-urban)}.mode-btn svg{width:18px;height:18px;fill:currentColor}
+    .map-mode-toggle{position:fixed;top:70px;left:50%;transform:translateX(-50%);display:flex;background:rgba(255,255,255,.95);border-radius:25px;padding:4px;box-shadow:0 4px 20px rgba(0,0,0,.15);z-index:1000;backdrop-filter:blur(10px);border:1px solid rgba(0,0,0,.1)}
+    .mode-btn{display:flex;align-items:center;gap:6px;padding:10px 20px;border:none;background:transparent;color:rgba(0,0,0,.5);font-size:14px;font-weight:600;cursor:pointer;border-radius:21px;transition:all .25s}
+    .mode-btn:hover{color:rgba(0,0,0,.8)}.mode-btn.active{color:#fff}.mode-btn.active.trails{background:var(--accent-trails)}.mode-btn.active.urban{background:var(--accent-urban)}.mode-btn svg{width:18px;height:18px;fill:currentColor}
     .map-controls{position:fixed;right:16px;top:130px;display:flex;flex-direction:column;gap:8px;z-index:900}
-    .map-control-btn{width:44px;height:44px;background:rgba(26,26,26,.9);border:1px solid var(--border-color);border-radius:10px;color:var(--text-primary);font-size:20px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .2s}
-    .map-control-btn:hover{background:var(--bg-tertiary)}.map-control-btn:active{transform:scale(.95)}
-    .context-fab{position:fixed;bottom:calc(64px + 20px + env(safe-area-inset-bottom,0));right:20px;height:56px;padding:0 24px;border:none;border-radius:28px;color:var(--text-primary);font-size:15px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:8px;z-index:1010;box-shadow:0 4px 16px rgba(0,0,0,.3);transition:all .3s}
+    .map-control-btn{width:44px;height:44px;background:rgba(255,255,255,.95);border:1px solid rgba(0,0,0,.1);border-radius:10px;color:#333;font-size:20px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .2s;box-shadow:0 2px 8px rgba(0,0,0,.1)}
+    .map-control-btn:hover{background:#fff;box-shadow:0 4px 12px rgba(0,0,0,.15)}.map-control-btn:active{transform:scale(.95)}
+    .context-fab{position:fixed;bottom:calc(64px + 20px + env(safe-area-inset-bottom,0));right:20px;height:56px;padding:0 24px;border:none;border-radius:28px;color:#fff;font-size:15px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:8px;z-index:1010;box-shadow:0 4px 16px rgba(0,0,0,.3);transition:all .3s}
     .context-fab:hover{transform:scale(1.05)}.context-fab:active{transform:scale(.98)}.context-fab svg{width:22px;height:22px;fill:currentColor}.context-fab.trails{background:var(--accent-trails)}.context-fab.urban{background:var(--accent-urban)}.context-fab.hidden{transform:translateY(100px);opacity:0;pointer-events:none}
     .layer-container{transition:opacity .3s}.layer-container.hidden{opacity:0;pointer-events:none;display:none!important}
-    .status-bar{position:fixed;bottom:calc(64px + 90px + env(safe-area-inset-bottom,0));left:16px;right:16px;background:rgba(26,26,26,.95);border-radius:16px;padding:16px;display:flex;justify-content:space-around;z-index:900;backdrop-filter:blur(10px);border:1px solid var(--border-color)}.status-bar.hidden{display:none}.status-item{text-align:center}.status-value{font-size:1.5rem;font-weight:700;color:var(--accent-trails)}.status-label{font-size:.75rem;color:var(--text-muted);text-transform:uppercase}
+    .status-bar{position:fixed;bottom:calc(64px + 90px + env(safe-area-inset-bottom,0));left:16px;right:16px;background:rgba(255,255,255,.95);border-radius:16px;padding:16px;display:flex;justify-content:space-around;z-index:900;backdrop-filter:blur(10px);border:1px solid rgba(0,0,0,.1);box-shadow:0 4px 20px rgba(0,0,0,.1)}.status-bar.hidden{display:none}.status-item{text-align:center}.status-value{font-size:1.5rem;font-weight:700;color:var(--accent-trails)}.status-label{font-size:.75rem;color:#666;text-transform:uppercase}
     .tracking-controls{position:fixed;bottom:calc(64px + 20px + env(safe-area-inset-bottom,0));left:50%;transform:translateX(-50%);display:flex;gap:16px;z-index:1010}.tracking-controls.hidden{display:none}
-    .tracking-btn{width:64px;height:64px;border-radius:50%;border:none;font-size:24px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .2s}.tracking-btn.stop{background:var(--error);color:#fff}.tracking-btn.pause{background:var(--accent-urban);color:#fff}.tracking-btn:hover{transform:scale(1.1)}
+    .tracking-btn{width:64px;height:64px;border-radius:50%;border:none;font-size:24px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .2s;box-shadow:0 4px 16px rgba(0,0,0,.2)}.tracking-btn.stop{background:var(--error);color:#fff}.tracking-btn.pause{background:var(--accent-urban);color:#fff}.tracking-btn:hover{transform:scale(1.1)}
     .filter-pills{position:fixed;top:120px;left:16px;right:16px;display:flex;gap:8px;overflow-x:auto;padding:8px 0;z-index:800;scrollbar-width:none}.filter-pills::-webkit-scrollbar{display:none}
-    .filter-pill{padding:8px 16px;background:rgba(26,26,26,.9);border:1px solid var(--border-color);border-radius:20px;color:var(--text-secondary);font-size:13px;font-weight:500;white-space:nowrap;cursor:pointer;transition:all .2s}.filter-pill:hover{background:var(--bg-tertiary)}.filter-pill.active{background:var(--accent-urban);border-color:var(--accent-urban);color:#fff}
-    .locate-btn{position:fixed;left:16px;bottom:calc(64px + 20px + env(safe-area-inset-bottom,0));width:48px;height:48px;background:rgba(26,26,26,.95);border:1px solid var(--border-color);border-radius:50%;color:var(--text-primary);font-size:20px;cursor:pointer;display:flex;align-items:center;justify-content:center;z-index:900}.locate-btn:hover{background:var(--bg-tertiary)}.locate-btn.active{color:var(--accent-trails);border-color:var(--accent-trails)}
+    .filter-pill{padding:8px 16px;background:rgba(255,255,255,.95);border:1px solid rgba(0,0,0,.1);border-radius:20px;color:#666;font-size:13px;font-weight:500;white-space:nowrap;cursor:pointer;transition:all .2s;box-shadow:0 2px 8px rgba(0,0,0,.08)}.filter-pill:hover{background:#fff}.filter-pill.active{background:var(--accent-urban);border-color:var(--accent-urban);color:#fff}
+    .locate-btn{position:fixed;left:16px;bottom:calc(64px + 20px + env(safe-area-inset-bottom,0));width:48px;height:48px;background:rgba(255,255,255,.95);border:1px solid rgba(0,0,0,.1);border-radius:50%;color:#333;font-size:20px;cursor:pointer;display:flex;align-items:center;justify-content:center;z-index:900;box-shadow:0 2px 8px rgba(0,0,0,.1)}.locate-btn:hover{background:#fff}.locate-btn.active{color:var(--accent-trails);border-color:var(--accent-trails)}
     .toast{position:fixed;bottom:calc(64px + 90px);left:50%;transform:translateX(-50%) translateY(100px);background:rgba(26,26,26,.95);color:#fff;padding:12px 24px;border-radius:25px;font-size:14px;font-weight:500;z-index:2000;opacity:0;transition:all .3s}.toast.show{transform:translateX(-50%) translateY(0);opacity:1}.toast.success{background:rgba(76,175,80,.95)}.toast.error{background:rgba(244,67,54,.95)}
-    .leaflet-control-zoom{display:none!important}.leaflet-control-attribution{font-size:10px!important;background:rgba(26,26,26,.8)!important;color:var(--text-muted)!important}
+    .leaflet-control-zoom{display:none!important}.leaflet-control-attribution{font-size:10px!important;background:rgba(255,255,255,.8)!important;color:#666!important}
     .user-marker{width:20px!important;height:20px!important;background:var(--accent-blue);border:3px solid #fff;border-radius:50%;box-shadow:0 0 0 8px rgba(33,150,243,.3)}.trail-marker{background:var(--accent-trails);border:3px solid #fff;border-radius:50%;width:16px!important;height:16px!important;box-shadow:0 2px 6px rgba(0,0,0,.3)}.report-marker{width:32px!important;height:32px!important;display:flex;align-items:center;justify-content:center;font-size:16px;background:var(--accent-urban);border:2px solid #fff;border-radius:50%;box-shadow:0 2px 6px rgba(0,0,0,.3)}
     .modal-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.8);backdrop-filter:blur(4px);display:flex;align-items:flex-end;justify-content:center;z-index:10000;padding:0;opacity:0;pointer-events:none;transition:opacity .3s}.modal-overlay.open{opacity:1;pointer-events:auto}
     .modal-container{background:var(--bg-primary);border-radius:24px 24px 0 0;width:100%;max-width:600px;max-height:90vh;overflow-y:auto;transform:translateY(100%);transition:transform .3s}.modal-overlay.open .modal-container{transform:translateY(0)}
@@ -73,7 +77,13 @@
 <body class="map-page">
   <h1 class="visually-hidden">Accessible Map</h1>
   <div class="loading-overlay" id="loadingOverlay"><div class="loading-spinner"></div><p class="loading-text">Loading map...</p></div>
-  <header class="top-bar"><div class="top-bar-brand"><span>♿</span><span>Accessible</span></div></header>
+  <header class="top-bar">
+    <div class="top-bar-brand"><span>♿</span><span>Accessible</span></div>
+    <div class="top-bar-user" id="topBarUser">
+      <span class="user-name" id="userName"></span>
+      <div class="user-avatar anonymous" id="userAvatar" onclick="handleUserClick()">?</div>
+    </div>
+  </header>
   <div class="map-mode-toggle" id="modeToggle">
     <button class="mode-btn trails active" id="trailsModeBtn" onclick="setMode('trails')"><svg viewBox="0 0 24 24"><path d="M13.5 5.5c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zM9.8 8.9L7 23h2.1l1.8-8 2.1 2v6h2v-7.5l-2.1-2 .6-3C14.8 12 16.8 13 19 13v-2c-1.9 0-3.5-1-4.3-2.4l-1-1.6c-.4-.6-1-1-1.7-1-.3 0-.5.1-.8.1L6 8.3V13h2V9.6l1.8-.7"/></svg>Trails</button>
     <button class="mode-btn urban" id="urbanModeBtn" onclick="setMode('urban')"><svg viewBox="0 0 24 24"><path d="M12 2C8.14 2 5 5.14 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.86-3.14-7-7-7zm1 11h-2v-2h2v2zm0-4h-2V5h2v4z"/></svg>Urban</button>
@@ -151,7 +161,44 @@
     const firebaseConfig={apiKey:"AIzaSyAmsm916Lzp0MUXANq3SECO4ec7q1H0Vu4",authDomain:"accessnaturebeta-821a2.firebaseapp.com",projectId:"accessnaturebeta-821a2",storageBucket:"accessnaturebeta-821a2.appspot.com",messagingSenderId:"670888101781",appId:"1:670888101781:web:b4cf57f58e86182466589c"};
     let app=getApps().length===0?initializeApp(firebaseConfig):getApp();const auth=getAuth(app);const db=getFirestore(app);const storage=getStorage(app);
     window.auth=auth;window.db=db;window.storage=storage;window.firebaseModules={collection,query,where,getDocs,addDoc,doc,getDoc,orderBy,limit,serverTimestamp,ref,uploadBytes,getDownloadURL};
-    onAuthStateChanged(auth,(user)=>{window.currentUser=user;if(user){console.log('✅ User signed in:',user.email||'Anonymous');window.dispatchEvent(new CustomEvent('authStateChanged',{detail:{user}}));}else{console.log('👤 No user signed in');signInAnonymously(auth).catch(console.error);}});
+    
+    // Auth state with UI update
+    onAuthStateChanged(auth,(user)=>{
+      window.currentUser=user;
+      updateUserUI(user);
+      if(user){
+        console.log('✅ User signed in:',user.email||'Anonymous');
+        window.dispatchEvent(new CustomEvent('authStateChanged',{detail:{user}}));
+      }else{
+        console.log('👤 No user signed in');
+        signInAnonymously(auth).catch(console.error);
+      }
+    });
+    
+    function updateUserUI(user){
+      const avatar=document.getElementById('userAvatar');
+      const name=document.getElementById('userName');
+      if(user&&!user.isAnonymous){
+        const displayName=user.displayName||user.email?.split('@')[0]||'User';
+        avatar.textContent=displayName.charAt(0).toUpperCase();
+        avatar.classList.remove('anonymous');
+        name.textContent=displayName;
+      }else{
+        avatar.textContent='?';
+        avatar.classList.add('anonymous');
+        name.textContent='';
+      }
+    }
+    window.updateUserUI=updateUserUI;
+    
+    window.handleUserClick=function(){
+      if(window.currentUser&&!window.currentUser.isAnonymous){
+        window.location.href='profile.html';
+      }else{
+        openAuthModal();
+      }
+    };
+    
     window.handleLogin=async(e)=>{e.preventDefault();const email=document.getElementById('loginEmail').value;const password=document.getElementById('loginPassword').value;try{await signInWithEmailAndPassword(auth,email,password);closeAuthModal();showToast('Signed in successfully','success');}catch(error){showToast(error.message,'error');}};
     window.handleSignup=async(e)=>{e.preventDefault();const name=document.getElementById('signupName').value;const email=document.getElementById('signupEmail').value;const password=document.getElementById('signupPassword').value;try{const result=await createUserWithEmailAndPassword(auth,email,password);await updateProfile(result.user,{displayName:name});closeAuthModal();showToast('Account created!','success');}catch(error){showToast(error.message,'error');}};
     window.showLogin=()=>{document.getElementById('loginView').style.display='block';document.getElementById('signupView').style.display='none';};
@@ -159,10 +206,10 @@
     setTimeout(()=>{if(window.currentMode==='trails')loadTrailsFromFirebase();else loadReportsFromFirebase();document.getElementById('loadingOverlay').classList.add('hidden');},1500);
   </script>
   <script>
-    let map,userMarker;let currentMode='trails';window.currentMode=currentMode;let isTracking=false,isPaused=false;let trackingPath=[],trackingPolyline;let watchId=null,startTime=null,pausedTime=0,timerInterval=null;let reportMarkers=[],trailMarkers=[];let reportPickerMap=null,reportPickerMarker=null;let pendingPhotos={report:[],trail:[]};let isDarkMap=true;
-    const TILES={dark:'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',light:'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png'};let currentTileLayer;
+    let map,userMarker;let currentMode='trails';window.currentMode=currentMode;let isTracking=false,isPaused=false;let trackingPath=[],trackingPolyline;let watchId=null,startTime=null,pausedTime=0,timerInterval=null;let reportMarkers=[],trailMarkers=[];let reportPickerMap=null,reportPickerMarker=null;let pendingPhotos={report:[],trail:[]};let isDarkMap=false;
+    const TILES={dark:'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',light:'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png'};let currentTileLayer;
     document.addEventListener('DOMContentLoaded',()=>{initMap();locateUser();setupEventListeners();const urlParams=new URLSearchParams(window.location.search);if(urlParams.get('mode')==='urban')setMode('urban');});
-    function initMap(){map=L.map('map',{zoomControl:false}).setView([32.0853,34.7818],15);currentTileLayer=L.tileLayer(TILES.dark,{attribution:'© OpenStreetMap',maxZoom:19}).addTo(map);console.log('[Map] Initialized');}
+    function initMap(){map=L.map('map',{zoomControl:false}).setView([32.0853,34.7818],15);currentTileLayer=L.tileLayer(TILES.light,{attribution:'© OpenStreetMap',maxZoom:19}).addTo(map);console.log('[Map] Initialized with light theme');}
     function setupEventListeners(){document.querySelectorAll('.severity-option').forEach(opt=>{opt.addEventListener('click',()=>{document.querySelectorAll('.severity-option').forEach(o=>o.classList.remove('selected'));opt.classList.add('selected');opt.querySelector('input').checked=true;});});document.querySelectorAll('.toggle-option').forEach(opt=>{opt.addEventListener('click',()=>{const group=opt.closest('.toggle-options');if(group){group.querySelectorAll('.toggle-option').forEach(o=>o.classList.remove('selected'));}opt.classList.add('selected');opt.querySelector('input').checked=true;});});document.querySelectorAll('.filter-pill').forEach(pill=>{pill.addEventListener('click',()=>{document.querySelectorAll('.filter-pill').forEach(p=>p.classList.remove('active'));pill.classList.add('active');filterReports(pill.dataset.filter);});});document.getElementById('reportPhotos').addEventListener('change',(e)=>handlePhotos(e,'report'));document.getElementById('trailPhotos').addEventListener('change',(e)=>handlePhotos(e,'trail'));}
     function setMode(mode){currentMode=mode;window.currentMode=mode;document.getElementById('trailsModeBtn').classList.toggle('active',mode==='trails');document.getElementById('urbanModeBtn').classList.toggle('active',mode==='urban');document.getElementById('trailsLayer').classList.toggle('hidden',mode!=='trails');document.getElementById('urbanLayer').classList.toggle('hidden',mode!=='urban');if(mode==='trails'){loadTrailsFromFirebase();clearReportMarkers();}else{loadReportsFromFirebase();clearTrailMarkers();}const url=new URL(window.location);url.searchParams.set('mode',mode);window.history.replaceState({},'',url);showToast(`${mode==='trails'?'Trails':'Urban'} mode`);}
     function zoomIn(){map.zoomIn();}function zoomOut(){map.zoomOut();}
@@ -180,7 +227,7 @@
     function clearTrailMarkers(){trailMarkers.forEach(m=>map.removeLayer(m));trailMarkers=[];}function clearReportMarkers(){reportMarkers.forEach(m=>map.removeLayer(m));reportMarkers=[];}
     function filterReports(filter){reportMarkers.forEach(m=>{if(filter==='all'||m.category===filter)m.addTo(map);else map.removeLayer(m);});}
     function viewTrail(id){showToast('Trail details coming soon');}
-    function openReportModal(){document.getElementById('reportModal').classList.add('open');setTimeout(()=>{if(!reportPickerMap){reportPickerMap=L.map('reportMapPicker',{zoomControl:false}).setView(map.getCenter(),16);L.tileLayer(TILES.dark,{maxZoom:19}).addTo(reportPickerMap);reportPickerMap.on('click',(e)=>{setReportLocation(e.latlng.lat,e.latlng.lng);});}else{reportPickerMap.setView(map.getCenter(),16);}if(userMarker){const pos=userMarker.getLatLng();setReportLocation(pos.lat,pos.lng);}reportPickerMap.invalidateSize();},300);}
+    function openReportModal(){document.getElementById('reportModal').classList.add('open');setTimeout(()=>{if(!reportPickerMap){reportPickerMap=L.map('reportMapPicker',{zoomControl:false}).setView(map.getCenter(),16);L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19}).addTo(reportPickerMap);reportPickerMap.on('click',(e)=>{setReportLocation(e.latlng.lat,e.latlng.lng);});}else{reportPickerMap.setView(map.getCenter(),16);}if(userMarker){const pos=userMarker.getLatLng();setReportLocation(pos.lat,pos.lng);}reportPickerMap.invalidateSize();},300);}
     function setReportLocation(lat,lng){document.getElementById('reportLat').value=lat;document.getElementById('reportLng').value=lng;document.getElementById('reportLocationText').textContent=`${lat.toFixed(5)}, ${lng.toFixed(5)}`;if(reportPickerMarker){reportPickerMarker.setLatLng([lat,lng]);}else{reportPickerMarker=L.marker([lat,lng]).addTo(reportPickerMap);}}
     function closeReportModal(){document.getElementById('reportModal').classList.remove('open');}
     async function submitReport(){const btn=document.getElementById('submitReportBtn');btn.disabled=true;btn.innerHTML='<div class="spinner"></div> Submitting...';try{const lat=parseFloat(document.getElementById('reportLat').value);const lng=parseFloat(document.getElementById('reportLng').value);const issueType=document.getElementById('reportType').value;const title=document.getElementById('reportTitle').value;const description=document.getElementById('reportDescription').value;const severity=document.querySelector('input[name="severity"]:checked')?.value||3;const duration=document.querySelector('input[name="duration"]:checked')?.value||'permanent';if(!lat||!lng||!issueType||!title){throw new Error('Please fill in all required fields');}const{collection,addDoc,serverTimestamp}=window.firebaseModules;const report={location:{latitude:lat,longitude:lng},issueType,title,description,severity:parseInt(severity),durationType:duration,status:'new',createdAt:serverTimestamp(),userId:window.currentUser?.uid||'anonymous',userEmail:window.currentUser?.email||null};await addDoc(collection(window.db,'accessibility_reports'),report);closeReportModal();showToast('Report submitted!','success');loadReportsFromFirebase();document.getElementById('reportForm').reset();pendingPhotos.report=[];document.getElementById('reportPhotoGrid').innerHTML='';}catch(error){showToast(error.message,'error');}finally{btn.disabled=false;btn.innerHTML='📤 Submit Report';}}
