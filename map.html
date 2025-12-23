@@ -1,0 +1,706 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Accessible - Map</title>
+  
+  <!-- PWA Meta Tags -->
+  <meta name="theme-color" content="#1a1a1a">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <link rel="manifest" href="manifest.json">
+  
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  
+  <!-- Leaflet -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.3/dist/leaflet.css">
+  
+  <!-- App CSS -->
+  <link rel="stylesheet" href="src/css/global-nav.css">
+  
+  <!-- Apply saved preferences -->
+  <script>
+    (function() {
+      try {
+        var prefs = JSON.parse(localStorage.getItem('accessNature_displayPrefs') || '{}');
+        if (prefs.highContrast) document.documentElement.classList.add('high-contrast');
+      } catch(e) {}
+    })();
+  </script>
+  
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    
+    body {
+      font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: #1a1a1a;
+      color: #ffffff;
+      overflow: hidden;
+      height: 100vh;
+      height: 100dvh;
+    }
+    
+    .visually-hidden {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      border: 0;
+    }
+    
+    button:focus-visible, a:focus-visible {
+      outline: 3px solid #4CAF50;
+      outline-offset: 2px;
+    }
+    
+    /* Top bar */
+    .top-bar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 56px;
+      background: rgba(26, 26, 26, 0.95);
+      backdrop-filter: blur(10px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+    }
+    
+    .top-bar-brand {
+      font-size: 1.125rem;
+      font-weight: 600;
+      color: #ffffff;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    
+    /* Map */
+    #map {
+      position: fixed;
+      top: 56px;
+      left: 0;
+      right: 0;
+      bottom: 64px;
+      z-index: 1;
+    }
+    
+    /* Mode toggle */
+    .map-mode-toggle {
+      position: fixed;
+      top: 70px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      background: rgba(26, 26, 26, 0.95);
+      border-radius: 25px;
+      padding: 4px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+      z-index: 1000;
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    
+    .mode-btn {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 10px 20px;
+      border: none;
+      background: transparent;
+      color: rgba(255, 255, 255, 0.6);
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      border-radius: 21px;
+      transition: all 0.25s ease;
+    }
+    
+    .mode-btn:hover { color: rgba(255, 255, 255, 0.9); }
+    .mode-btn.active { color: #ffffff; }
+    .mode-btn.active.trails { background: #4CAF50; }
+    .mode-btn.active.urban { background: #FF9800; }
+    .mode-btn svg { width: 18px; height: 18px; fill: currentColor; }
+    
+    /* Map controls */
+    .map-controls {
+      position: fixed;
+      right: 16px;
+      top: 130px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      z-index: 900;
+    }
+    
+    .map-control-btn {
+      width: 44px;
+      height: 44px;
+      background: rgba(26, 26, 26, 0.9);
+      border: 1px solid rgba(255,255,255,0.2);
+      border-radius: 10px;
+      color: #ffffff;
+      font-size: 20px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s ease;
+    }
+    
+    .map-control-btn:hover { background: rgba(60, 60, 60, 0.95); }
+    .map-control-btn:active { transform: scale(0.95); }
+    
+    /* FAB */
+    .context-fab {
+      position: fixed;
+      bottom: calc(64px + 20px + env(safe-area-inset-bottom, 0));
+      right: 20px;
+      height: 56px;
+      padding: 0 24px;
+      border: none;
+      border-radius: 28px;
+      color: #ffffff;
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      z-index: 1010;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+      transition: all 0.3s ease;
+    }
+    
+    .context-fab:hover { transform: scale(1.05); }
+    .context-fab:active { transform: scale(0.98); }
+    .context-fab svg { width: 22px; height: 22px; fill: currentColor; }
+    .context-fab.trails { background: #4CAF50; box-shadow: 0 4px 16px rgba(76, 175, 80, 0.4); }
+    .context-fab.urban { background: #FF9800; box-shadow: 0 4px 16px rgba(255, 152, 0, 0.4); }
+    .context-fab.hidden { transform: translateY(100px); opacity: 0; pointer-events: none; }
+    
+    /* Layer container */
+    .layer-container { transition: opacity 0.3s ease; }
+    .layer-container.hidden { opacity: 0; pointer-events: none; display: none !important; }
+    
+    /* Status bar */
+    .status-bar {
+      position: fixed;
+      bottom: calc(64px + 90px + env(safe-area-inset-bottom, 0));
+      left: 16px;
+      right: 16px;
+      background: rgba(26, 26, 26, 0.95);
+      border-radius: 16px;
+      padding: 16px;
+      display: flex;
+      justify-content: space-around;
+      z-index: 900;
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255,255,255,0.1);
+    }
+    .status-bar.hidden { display: none; }
+    .status-item { text-align: center; }
+    .status-value { font-size: 1.5rem; font-weight: 700; color: #4CAF50; }
+    .status-label { font-size: 0.75rem; color: rgba(255,255,255,0.6); text-transform: uppercase; }
+    
+    /* Tracking controls */
+    .tracking-controls {
+      position: fixed;
+      bottom: calc(64px + 20px + env(safe-area-inset-bottom, 0));
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      gap: 16px;
+      z-index: 1010;
+    }
+    .tracking-controls.hidden { display: none; }
+    
+    .tracking-btn {
+      width: 64px;
+      height: 64px;
+      border-radius: 50%;
+      border: none;
+      font-size: 24px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s ease;
+    }
+    .tracking-btn.stop { background: #f44336; color: white; }
+    .tracking-btn.pause { background: #FF9800; color: white; }
+    .tracking-btn:hover { transform: scale(1.1); }
+    
+    /* Filter pills */
+    .filter-pills {
+      position: fixed;
+      top: 120px;
+      left: 16px;
+      right: 16px;
+      display: flex;
+      gap: 8px;
+      overflow-x: auto;
+      padding: 8px 0;
+      z-index: 800;
+      scrollbar-width: none;
+    }
+    .filter-pills::-webkit-scrollbar { display: none; }
+    
+    .filter-pill {
+      padding: 8px 16px;
+      background: rgba(26, 26, 26, 0.9);
+      border: 1px solid rgba(255,255,255,0.2);
+      border-radius: 20px;
+      color: rgba(255,255,255,0.8);
+      font-size: 13px;
+      font-weight: 500;
+      white-space: nowrap;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    .filter-pill:hover { background: rgba(60, 60, 60, 0.95); }
+    .filter-pill.active { background: #FF9800; border-color: #FF9800; color: white; }
+    
+    /* Locate button */
+    .locate-btn {
+      position: fixed;
+      left: 16px;
+      bottom: calc(64px + 20px + env(safe-area-inset-bottom, 0));
+      width: 48px;
+      height: 48px;
+      background: rgba(26, 26, 26, 0.95);
+      border: 1px solid rgba(255,255,255,0.2);
+      border-radius: 50%;
+      color: #ffffff;
+      font-size: 20px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 900;
+    }
+    .locate-btn:hover { background: rgba(60, 60, 60, 0.95); }
+    .locate-btn.active { color: #4CAF50; border-color: #4CAF50; }
+    
+    /* Toast */
+    .toast {
+      position: fixed;
+      bottom: calc(64px + 90px);
+      left: 50%;
+      transform: translateX(-50%) translateY(100px);
+      background: rgba(26, 26, 26, 0.95);
+      color: white;
+      padding: 12px 24px;
+      border-radius: 25px;
+      font-size: 14px;
+      font-weight: 500;
+      z-index: 2000;
+      opacity: 0;
+      transition: all 0.3s ease;
+    }
+    .toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
+    .toast.success { background: rgba(76, 175, 80, 0.95); }
+    .toast.error { background: rgba(244, 67, 54, 0.95); }
+    
+    /* Leaflet */
+    .leaflet-control-zoom { display: none !important; }
+    .leaflet-control-attribution { font-size: 10px !important; background: rgba(26, 26, 26, 0.8) !important; color: rgba(255,255,255,0.5) !important; }
+    
+    /* Markers */
+    .user-marker { width: 20px !important; height: 20px !important; background: #2196F3; border: 3px solid white; border-radius: 50%; box-shadow: 0 0 0 8px rgba(33, 150, 243, 0.3); }
+    .trail-marker { background: #4CAF50; border: 3px solid white; border-radius: 50%; width: 16px !important; height: 16px !important; }
+    .report-marker { width: 32px !important; height: 32px !important; display: flex; align-items: center; justify-content: center; font-size: 18px; background: #FF9800; border: 2px solid white; border-radius: 50%; }
+    
+    /* Auth Modal */
+    .auth-modal { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.7); display: flex; align-items: center; justify-content: center; z-index: 20000; padding: 16px; }
+    .auth-modal.hidden { display: none; }
+    .auth-modal-container { background: #1a1a1a; border-radius: 20px; width: 100%; max-width: 400px; border: 1px solid rgba(255,255,255,0.1); }
+    .auth-modal-header { padding: 20px; border-bottom: 1px solid rgba(255,255,255,0.1); display: flex; justify-content: space-between; align-items: center; }
+    .auth-modal-header h2 { font-size: 1.25rem; margin: 0; }
+    .auth-modal-close { width: 36px; height: 36px; border: none; background: rgba(255,255,255,0.1); border-radius: 50%; font-size: 1.25rem; color: white; cursor: pointer; }
+    .auth-form { display: none; padding: 20px; }
+    .auth-form.active { display: block; }
+    .auth-form-header { text-align: center; margin-bottom: 24px; }
+    .auth-form-header h3 { font-size: 1.125rem; margin-bottom: 4px; }
+    .auth-form-header p { color: rgba(255,255,255,0.6); font-size: 0.9rem; }
+    .auth-inputs { display: flex; flex-direction: column; gap: 12px; }
+    .input-group { position: relative; }
+    .input-group input { width: 100%; padding: 14px 16px 14px 44px; border: 1px solid rgba(255,255,255,0.2); border-radius: 10px; font-size: 1rem; background: rgba(255,255,255,0.05); color: white; }
+    .input-group input:focus { border-color: #4CAF50; outline: none; }
+    .input-icon { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); font-size: 1.1rem; }
+    .password-toggle { position: absolute; right: 12px; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer; font-size: 1.1rem; }
+    .auth-submit-btn { width: 100%; padding: 14px; background: #4CAF50; color: white; border: none; border-radius: 10px; font-size: 1rem; font-weight: 600; cursor: pointer; margin-top: 8px; }
+    .auth-submit-btn:hover { background: #43a047; }
+    .auth-switch { text-align: center; margin-top: 20px; padding-top: 20px; border-top: 1px solid rgba(255,255,255,0.1); color: rgba(255,255,255,0.6); font-size: 0.9rem; }
+    .switch-btn { background: none; border: none; color: #4CAF50; font-weight: 600; cursor: pointer; }
+  </style>
+</head>
+<body class="map-page">
+  <h1 class="visually-hidden">Accessible Map</h1>
+  
+  <!-- Top bar -->
+  <header class="top-bar">
+    <div class="top-bar-brand">
+      <span>♿</span>
+      <span>Accessible</span>
+    </div>
+  </header>
+  
+  <!-- Mode Toggle -->
+  <div class="map-mode-toggle" id="modeToggle">
+    <button class="mode-btn trails active" id="trailsModeBtn" onclick="setMode('trails')">
+      <svg viewBox="0 0 24 24"><path d="M13.5 5.5c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zM9.8 8.9L7 23h2.1l1.8-8 2.1 2v6h2v-7.5l-2.1-2 .6-3C14.8 12 16.8 13 19 13v-2c-1.9 0-3.5-1-4.3-2.4l-1-1.6c-.4-.6-1-1-1.7-1-.3 0-.5.1-.8.1L6 8.3V13h2V9.6l1.8-.7"/></svg>
+      Trails
+    </button>
+    <button class="mode-btn urban" id="urbanModeBtn" onclick="setMode('urban')">
+      <svg viewBox="0 0 24 24"><path d="M12 2C8.14 2 5 5.14 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.86-3.14-7-7-7zm1 11h-2v-2h2v2zm0-4h-2V5h2v4z"/></svg>
+      Urban
+    </button>
+  </div>
+  
+  <!-- Map -->
+  <div id="map"></div>
+  
+  <!-- Map Controls -->
+  <div class="map-controls">
+    <button class="map-control-btn" onclick="zoomIn()">+</button>
+    <button class="map-control-btn" onclick="zoomOut()">−</button>
+  </div>
+  
+  <!-- Locate button -->
+  <button class="locate-btn" id="locateBtn" onclick="locateUser()">📍</button>
+  
+  <!-- TRAILS LAYER -->
+  <div id="trailsLayer" class="layer-container">
+    <div class="status-bar hidden" id="trackingStatus">
+      <div class="status-item">
+        <div class="status-value" id="distanceValue">0.00</div>
+        <div class="status-label">km</div>
+      </div>
+      <div class="status-item">
+        <div class="status-value" id="durationValue">00:00</div>
+        <div class="status-label">time</div>
+      </div>
+      <div class="status-item">
+        <div class="status-value" id="speedValue">0.0</div>
+        <div class="status-label">km/h</div>
+      </div>
+    </div>
+    
+    <div class="tracking-controls hidden" id="trackingControls">
+      <button class="tracking-btn pause" onclick="pauseTracking()">⏸️</button>
+      <button class="tracking-btn stop" onclick="stopTracking()">⏹️</button>
+    </div>
+    
+    <button class="context-fab trails" id="trailsFab" onclick="startTracking()">
+      <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="12" cy="12" r="4"/></svg>
+      Record Trail
+    </button>
+  </div>
+  
+  <!-- URBAN LAYER -->
+  <div id="urbanLayer" class="layer-container hidden">
+    <div class="filter-pills" id="filterPills">
+      <button class="filter-pill active" data-filter="all">All</button>
+      <button class="filter-pill" data-filter="barrier">🚧 Barriers</button>
+      <button class="filter-pill" data-filter="hazard">⚠️ Hazards</button>
+      <button class="filter-pill" data-filter="parking">♿ Parking</button>
+      <button class="filter-pill" data-filter="ramp">🔼 Ramps</button>
+    </div>
+    
+    <button class="context-fab urban" id="urbanFab" onclick="openReportModal()">
+      <svg viewBox="0 0 24 24"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>
+      Report Issue
+    </button>
+  </div>
+  
+  <!-- Toast -->
+  <div id="toast" class="toast"></div>
+  
+  <!-- Auth Modal -->
+  <div id="authModal" class="auth-modal hidden">
+    <div class="auth-modal-container">
+      <div class="auth-modal-header">
+        <h2>Welcome</h2>
+        <button class="auth-modal-close" onclick="closeAuthModal()">×</button>
+      </div>
+      <div id="loginForm" class="auth-form active">
+        <div class="auth-form-header">
+          <h3>Sign In</h3>
+          <p>Continue your journey</p>
+        </div>
+        <form class="auth-inputs" id="loginFormElement">
+          <div class="input-group">
+            <input type="email" id="loginEmail" placeholder="Email" required>
+            <span class="input-icon">📧</span>
+          </div>
+          <div class="input-group">
+            <input type="password" id="loginPassword" placeholder="Password" required>
+            <span class="input-icon">🔒</span>
+          </div>
+          <button type="submit" class="auth-submit-btn">Sign In</button>
+        </form>
+        <div class="auth-switch">
+          <p>No account? <button type="button" onclick="switchToSignup()" class="switch-btn">Sign up</button></p>
+        </div>
+      </div>
+      <div id="signupForm" class="auth-form">
+        <div class="auth-form-header">
+          <h3>Create Account</h3>
+          <p>Join the community</p>
+        </div>
+        <form class="auth-inputs" id="signupFormElement">
+          <div class="input-group">
+            <input type="text" id="signupName" placeholder="Name" required>
+            <span class="input-icon">👤</span>
+          </div>
+          <div class="input-group">
+            <input type="email" id="signupEmail" placeholder="Email" required>
+            <span class="input-icon">📧</span>
+          </div>
+          <div class="input-group">
+            <input type="password" id="signupPassword" placeholder="Password" required>
+            <span class="input-icon">🔒</span>
+          </div>
+          <button type="submit" class="auth-submit-btn">Create Account</button>
+        </form>
+        <div class="auth-switch">
+          <p>Have account? <button type="button" onclick="switchToLogin()" class="switch-btn">Sign in</button></p>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Scripts -->
+  <script src="https://unpkg.com/leaflet@1.9.3/dist/leaflet.js"></script>
+  
+  <script>
+    // STATE
+    let map, userMarker;
+    let currentMode = 'trails';
+    let isTracking = false, isPaused = false;
+    let trackingPath = [], trackingPolyline;
+    let watchId = null, startTime = null, pausedTime = 0, timerInterval = null;
+    let reportMarkers = [], trailMarkers = [];
+    
+    // INIT
+    document.addEventListener('DOMContentLoaded', () => {
+      initMap();
+      locateUser();
+      
+      const urlParams = new URLSearchParams(window.location.search);
+      if (urlParams.get('mode') === 'urban') setMode('urban');
+      
+      document.querySelectorAll('.filter-pill').forEach(pill => {
+        pill.addEventListener('click', () => {
+          document.querySelectorAll('.filter-pill').forEach(p => p.classList.remove('active'));
+          pill.classList.add('active');
+          filterReports(pill.dataset.filter);
+        });
+      });
+    });
+    
+    function initMap() {
+      map = L.map('map', { zoomControl: false }).setView([32.0853, 34.7818], 15);
+      L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+        attribution: '© OpenStreetMap',
+        maxZoom: 19
+      }).addTo(map);
+    }
+    
+    // MODE
+    function setMode(mode) {
+      currentMode = mode;
+      document.getElementById('trailsModeBtn').classList.toggle('active', mode === 'trails');
+      document.getElementById('urbanModeBtn').classList.toggle('active', mode === 'urban');
+      document.getElementById('trailsLayer').classList.toggle('hidden', mode !== 'trails');
+      document.getElementById('urbanLayer').classList.toggle('hidden', mode !== 'urban');
+      
+      if (mode === 'trails') { loadTrails(); clearReportMarkers(); }
+      else { loadReports(); clearTrailMarkers(); }
+      
+      const url = new URL(window.location);
+      url.searchParams.set('mode', mode);
+      window.history.replaceState({}, '', url);
+      showToast(`${mode === 'trails' ? 'Trails' : 'Urban'} mode`);
+    }
+    
+    // LOCATION
+    function locateUser() {
+      const btn = document.getElementById('locateBtn');
+      btn.classList.add('active');
+      
+      navigator.geolocation?.getCurrentPosition(
+        (pos) => {
+          const { latitude, longitude } = pos.coords;
+          map.setView([latitude, longitude], 16);
+          if (userMarker) userMarker.setLatLng([latitude, longitude]);
+          else {
+            userMarker = L.marker([latitude, longitude], {
+              icon: L.divIcon({ className: 'user-marker', iconSize: [20, 20], iconAnchor: [10, 10] })
+            }).addTo(map);
+          }
+          btn.classList.remove('active');
+        },
+        () => { showToast('Location error', 'error'); btn.classList.remove('active'); },
+        { enableHighAccuracy: true }
+      );
+    }
+    
+    function zoomIn() { map.zoomIn(); }
+    function zoomOut() { map.zoomOut(); }
+    
+    // TRACKING
+    function startTracking() {
+      if (isTracking) return;
+      isTracking = true;
+      trackingPath = [];
+      startTime = Date.now();
+      pausedTime = 0;
+      
+      document.getElementById('trailsFab').classList.add('hidden');
+      document.getElementById('trackingStatus').classList.remove('hidden');
+      document.getElementById('trackingControls').classList.remove('hidden');
+      
+      watchId = navigator.geolocation.watchPosition(
+        (pos) => {
+          if (isPaused) return;
+          const point = [pos.coords.latitude, pos.coords.longitude];
+          trackingPath.push(point);
+          userMarker?.setLatLng(point);
+          map.panTo(point);
+          
+          if (trackingPolyline) trackingPolyline.setLatLngs(trackingPath);
+          else trackingPolyline = L.polyline(trackingPath, { color: '#4CAF50', weight: 4 }).addTo(map);
+          
+          updateStats(pos.coords.speed);
+        },
+        (err) => showToast('GPS error', 'error'),
+        { enableHighAccuracy: true, maximumAge: 0 }
+      );
+      
+      timerInterval = setInterval(updateTimer, 1000);
+      showToast('Recording started', 'success');
+    }
+    
+    function pauseTracking() {
+      isPaused = !isPaused;
+      document.querySelector('.tracking-btn.pause').innerHTML = isPaused ? '▶️' : '⏸️';
+      if (isPaused) { pausedTime += Date.now() - startTime; showToast('Paused'); }
+      else { startTime = Date.now(); showToast('Resumed'); }
+    }
+    
+    function stopTracking() {
+      isTracking = false;
+      if (watchId) navigator.geolocation.clearWatch(watchId);
+      if (timerInterval) clearInterval(timerInterval);
+      
+      document.getElementById('trailsFab').classList.remove('hidden');
+      document.getElementById('trackingStatus').classList.add('hidden');
+      document.getElementById('trackingControls').classList.add('hidden');
+      
+      const dist = calculateDistance();
+      showToast(`Trail: ${dist.toFixed(2)} km`, 'success');
+    }
+    
+    function updateStats(speed) {
+      document.getElementById('distanceValue').textContent = calculateDistance().toFixed(2);
+      document.getElementById('speedValue').textContent = speed ? (speed * 3.6).toFixed(1) : '0.0';
+    }
+    
+    function updateTimer() {
+      if (!startTime || isPaused) return;
+      const elapsed = pausedTime + (Date.now() - startTime);
+      const mins = Math.floor(elapsed / 60000);
+      const secs = Math.floor((elapsed % 60000) / 1000);
+      document.getElementById('durationValue').textContent = 
+        `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+    }
+    
+    function calculateDistance() {
+      let dist = 0;
+      for (let i = 1; i < trackingPath.length; i++) {
+        dist += map.distance(trackingPath[i-1], trackingPath[i]);
+      }
+      return dist / 1000;
+    }
+    
+    // TRAILS
+    function loadTrails() {
+      clearTrailMarkers();
+      [[32.0853, 34.7818, 'Beach Trail'], [32.0900, 34.7750, 'Yarkon Loop']].forEach(([lat, lng, name]) => {
+        const m = L.marker([lat, lng], {
+          icon: L.divIcon({ className: 'trail-marker', iconSize: [16, 16], iconAnchor: [8, 8] })
+        }).addTo(map).bindPopup(`<b>${name}</b>`);
+        trailMarkers.push(m);
+      });
+    }
+    
+    function clearTrailMarkers() { trailMarkers.forEach(m => map.removeLayer(m)); trailMarkers = []; }
+    
+    // REPORTS
+    function loadReports() {
+      clearReportMarkers();
+      const icons = { barrier: '🚧', hazard: '⚠️', parking: '♿', ramp: '🔼' };
+      [
+        [32.0860, 34.7810, 'barrier', 'Blocked sidewalk'],
+        [32.0845, 34.7830, 'hazard', 'Broken curb'],
+        [32.0870, 34.7800, 'parking', 'Accessible spot']
+      ].forEach(([lat, lng, type, title]) => {
+        const m = L.marker([lat, lng], {
+          icon: L.divIcon({
+            html: `<div class="report-marker">${icons[type]}</div>`,
+            className: '',
+            iconSize: [32, 32],
+            iconAnchor: [16, 16]
+          })
+        }).addTo(map).bindPopup(`<b>${title}</b>`);
+        m.reportType = type;
+        reportMarkers.push(m);
+      });
+    }
+    
+    function clearReportMarkers() { reportMarkers.forEach(m => map.removeLayer(m)); reportMarkers = []; }
+    
+    function filterReports(filter) {
+      reportMarkers.forEach(m => {
+        if (filter === 'all' || m.reportType === filter) m.addTo(map);
+        else map.removeLayer(m);
+      });
+    }
+    
+    function openReportModal() { showToast('Report form coming soon'); }
+    
+    // TOAST
+    function showToast(msg, type = '') {
+      const t = document.getElementById('toast');
+      t.textContent = msg;
+      t.className = 'toast show ' + type;
+      setTimeout(() => t.classList.remove('show'), 3000);
+    }
+    
+    // AUTH
+    function closeAuthModal() { document.getElementById('authModal').classList.add('hidden'); }
+    function switchToSignup() { document.getElementById('loginForm').classList.remove('active'); document.getElementById('signupForm').classList.add('active'); }
+    function switchToLogin() { document.getElementById('signupForm').classList.remove('active'); document.getElementById('loginForm').classList.add('active'); }
+    window.openAuthModal = () => document.getElementById('authModal').classList.remove('hidden');
+  </script>
+  
+  <!-- Bottom Nav -->
+  <script type="module">
+    import { initGlobalNav } from './src/components/globalNav.js';
+    initGlobalNav({ currentPage: 'map' });
+  </script>
+</body>
+</html>

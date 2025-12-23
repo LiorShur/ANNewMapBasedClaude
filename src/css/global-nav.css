@@ -1,0 +1,374 @@
+/* ==============================================
+   ACCESSIBLE - GLOBAL BOTTOM NAVIGATION
+   3-Tab Structure: Home | Map | Profile
+   
+   File: src/css/global-nav.css
+   Version: 4.0
+   ============================================== */
+
+:root {
+  /* Bottom nav variables - dark theme */
+  --bottom-nav-height: 64px;
+  --bottom-nav-bg: #1a1a1a;
+  --bottom-nav-border: #333333;
+  --bottom-nav-text: rgba(255, 255, 255, 0.6);
+  --bottom-nav-text-active: #ffffff;
+  --bottom-nav-icon-size: 26px;
+  --bottom-nav-accent: #4CAF50;
+}
+
+/* ==============================================
+   BOTTOM NAVIGATION BAR
+   ============================================== */
+
+.global-bottom-nav {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: var(--bottom-nav-height);
+  background: var(--bottom-nav-bg);
+  border-top: 1px solid var(--bottom-nav-border);
+  display: flex;
+  align-items: stretch;
+  justify-content: space-around;
+  padding: 0;
+  padding-bottom: env(safe-area-inset-bottom, 0);
+  z-index: 1020;
+  box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.3);
+  transition: transform 0.3s ease;
+}
+
+/* Hidden state for fullscreen mode */
+.global-bottom-nav.hidden {
+  transform: translateY(100%);
+}
+
+/* ==============================================
+   NAV ITEMS
+   ============================================== */
+
+.global-nav-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  flex: 1;
+  height: 100%;
+  padding: 8px 4px;
+  background: none;
+  border: none;
+  color: var(--bottom-nav-text);
+  text-decoration: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  -webkit-tap-highlight-color: transparent;
+  position: relative;
+}
+
+.global-nav-item:hover {
+  color: var(--bottom-nav-text-active);
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.global-nav-item:active {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.global-nav-item.active {
+  color: var(--bottom-nav-text-active);
+}
+
+/* Active indicator bar */
+.global-nav-item.active::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 48px;
+  height: 3px;
+  background: var(--bottom-nav-accent);
+  border-radius: 0 0 3px 3px;
+}
+
+/* Icon container */
+.global-nav-item .nav-icon {
+  width: var(--bottom-nav-icon-size);
+  height: var(--bottom-nav-icon-size);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.global-nav-item .nav-icon svg {
+  width: 100%;
+  height: 100%;
+  fill: currentColor;
+}
+
+/* Label */
+.global-nav-item .nav-label {
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+/* Profile signed-in state - green accent */
+.global-nav-item.signed-in {
+  color: var(--bottom-nav-accent);
+}
+
+.global-nav-item.signed-in .nav-icon svg {
+  fill: var(--bottom-nav-accent);
+}
+
+.global-nav-item.signed-in.active::before {
+  background: var(--bottom-nav-accent);
+}
+
+/* ==============================================
+   MAP MODE TOGGLE (Floating pill)
+   ============================================== */
+
+.map-mode-toggle {
+  position: fixed;
+  top: 70px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  background: rgba(26, 26, 26, 0.95);
+  border-radius: 25px;
+  padding: 4px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+  z-index: 1000;
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.map-mode-toggle .mode-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 20px;
+  border: none;
+  background: transparent;
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  border-radius: 21px;
+  transition: all 0.25s ease;
+  white-space: nowrap;
+}
+
+.map-mode-toggle .mode-btn:hover {
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.map-mode-toggle .mode-btn.active {
+  background: #ffffff;
+  color: #1a1a1a;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+.map-mode-toggle .mode-btn.active.trails {
+  background: #4CAF50;
+  color: #ffffff;
+}
+
+.map-mode-toggle .mode-btn.active.urban {
+  background: #FF9800;
+  color: #ffffff;
+}
+
+.map-mode-toggle .mode-btn svg {
+  width: 18px;
+  height: 18px;
+  fill: currentColor;
+}
+
+/* Hide toggle in fullscreen */
+.map-mode-toggle.hidden {
+  transform: translateX(-50%) translateY(-100px);
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* ==============================================
+   PAGE CONTENT OFFSET
+   ============================================== */
+
+body.has-bottom-nav {
+  padding-bottom: calc(var(--bottom-nav-height) + env(safe-area-inset-bottom, 0));
+}
+
+/* On map page - no padding, map fills screen */
+body.map-page.has-bottom-nav {
+  padding-bottom: 0;
+}
+
+/* Adjust floating elements above bottom nav */
+body.has-bottom-nav .context-fab {
+  bottom: calc(var(--bottom-nav-height) + 20px + env(safe-area-inset-bottom, 0)) !important;
+}
+
+body.has-bottom-nav .sos-button,
+body.has-bottom-nav #sosButton {
+  bottom: calc(var(--bottom-nav-height) + 20px + env(safe-area-inset-bottom, 0)) !important;
+}
+
+/* ==============================================
+   HIDE TOP NAV HAMBURGER ON MOBILE
+   ============================================== */
+
+@media (max-width: 768px) {
+  body.has-bottom-nav .menu-toggle {
+    display: none !important;
+  }
+  
+  body.has-bottom-nav .nav-menu {
+    display: none !important;
+  }
+  
+  /* Center brand in top nav */
+  body.has-bottom-nav .top-nav {
+    justify-content: center;
+  }
+  
+  /* Hide auth indicator in top nav */
+  body.has-bottom-nav .auth-status {
+    display: none !important;
+  }
+}
+
+/* ==============================================
+   DESKTOP: Hide bottom nav, show top nav
+   ============================================== */
+
+@media (min-width: 769px) {
+  .global-bottom-nav {
+    display: none;
+  }
+  
+  body.has-bottom-nav {
+    padding-bottom: 0;
+  }
+  
+  /* Desktop: Move toggle to side */
+  .map-mode-toggle {
+    top: 80px;
+    left: 20px;
+    transform: none;
+  }
+}
+
+/* ==============================================
+   CONTEXTUAL FAB
+   ============================================== */
+
+.context-fab {
+  position: fixed;
+  bottom: calc(var(--bottom-nav-height) + 20px + env(safe-area-inset-bottom, 0));
+  right: 20px;
+  height: 56px;
+  background: var(--bottom-nav-accent);
+  color: #ffffff;
+  border: none;
+  border-radius: 28px;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 0 24px;
+  z-index: 1010;
+  -webkit-tap-highlight-color: transparent;
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.context-fab:hover {
+  transform: scale(1.05);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
+}
+
+.context-fab:active {
+  transform: scale(0.98);
+}
+
+.context-fab svg {
+  width: 22px;
+  height: 22px;
+  fill: currentColor;
+}
+
+/* Trails FAB - green */
+.context-fab.trails {
+  background: #4CAF50;
+  box-shadow: 0 4px 12px rgba(76, 175, 80, 0.4);
+}
+
+/* Urban/Reports FAB - orange */
+.context-fab.urban {
+  background: #FF9800;
+  box-shadow: 0 4px 12px rgba(255, 152, 0, 0.4);
+}
+
+/* Hide FAB */
+.context-fab.hidden {
+  transform: translateY(100px);
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* ==============================================
+   MAP LAYER VISIBILITY
+   ============================================== */
+
+.map-layer {
+  transition: opacity 0.3s ease;
+}
+
+.map-layer.hidden {
+  opacity: 0;
+  pointer-events: none;
+  display: none !important;
+}
+
+/* ==============================================
+   HIGH CONTRAST MODE
+   ============================================== */
+
+.high-contrast .global-bottom-nav {
+  border-top: 2px solid #ffffff;
+}
+
+.high-contrast .global-nav-item.active {
+  background: #ffffff;
+  color: #000000;
+}
+
+.high-contrast .map-mode-toggle {
+  background: #000000;
+  border: 2px solid #ffffff;
+}
+
+/* ==============================================
+   REDUCED MOTION
+   ============================================== */
+
+@media (prefers-reduced-motion: reduce) {
+  .global-bottom-nav,
+  .global-nav-item,
+  .context-fab,
+  .map-mode-toggle,
+  .mode-btn {
+    transition: none;
+  }
+}
+

@@ -1,0 +1,656 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Accessible - Making Nature Accessible for Everyone</title>
+  
+  <!-- Preconnect -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="preconnect" href="https://www.gstatic.com" crossorigin>
+  
+  <!-- Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=DM+Serif+Display&display=swap" rel="stylesheet">
+  
+  <!-- PWA -->
+  <meta name="theme-color" content="#4a7c59">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <link rel="manifest" href="manifest.json">
+  
+  <!-- Stylesheets -->
+  <link rel="stylesheet" href="src/css/home-dashboard.css">
+  <link rel="stylesheet" href="src/css/global-nav.css">
+  <link rel="stylesheet" href="src/css/auth.css">
+  
+  <style>
+    /* Critical CSS - Immediate render */
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    
+    body {
+      font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: #faf8f5;
+      color: #2d2a26;
+      min-height: 100vh;
+    }
+    
+    /* Skip link */
+    .skip-link {
+      position: absolute;
+      top: 0;
+      left: 0;
+      background: #4a7c59;
+      color: white;
+      padding: 8px 16px;
+      z-index: 100000;
+      text-decoration: none;
+      transform: translateY(-100%);
+      transition: transform 0.2s ease;
+    }
+    .skip-link:focus { transform: translateY(0); }
+    
+    /* Top nav - minimal for mobile */
+    .top-nav {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 56px;
+      background: #faf8f5;
+      border-bottom: 1px solid #e8e4dd;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+    }
+    
+    .nav-brand {
+      font-family: 'DM Serif Display', Georgia, serif;
+      font-size: 1.25rem;
+      color: #2d2a26;
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    
+    /* Focus styles */
+    button:focus-visible,
+    a:focus-visible,
+    input:focus-visible {
+      outline: 3px solid #4a7c59;
+      outline-offset: 2px;
+    }
+    
+    /* Visually hidden */
+    .visually-hidden {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      border: 0;
+    }
+    
+    /* Auth modal styles */
+    .auth-modal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.5);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 20000;
+      padding: 16px;
+    }
+    .auth-modal.hidden { display: none; }
+    
+    .auth-modal-container {
+      background: white;
+      border-radius: 16px;
+      width: 100%;
+      max-width: 400px;
+      max-height: 90vh;
+      overflow-y: auto;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    }
+    
+    .auth-modal-header {
+      padding: 20px;
+      border-bottom: 1px solid #e8e4dd;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    
+    .auth-modal-header h2 {
+      font-family: 'DM Serif Display', serif;
+      font-size: 1.25rem;
+      margin: 0;
+    }
+    
+    .auth-modal-close {
+      width: 36px;
+      height: 36px;
+      border: none;
+      background: #f5f2ed;
+      border-radius: 50%;
+      font-size: 1.25rem;
+      cursor: pointer;
+    }
+    
+    .auth-form { display: none; padding: 20px; }
+    .auth-form.active { display: block; }
+    
+    .auth-form-header { text-align: center; margin-bottom: 24px; }
+    .auth-form-header h3 { font-size: 1.125rem; margin-bottom: 4px; }
+    .auth-form-header p { color: #6b6560; font-size: 0.9rem; }
+    
+    .auth-inputs { display: flex; flex-direction: column; gap: 12px; }
+    
+    .input-group {
+      position: relative;
+    }
+    
+    .input-group input {
+      width: 100%;
+      padding: 14px 16px 14px 44px;
+      border: 1px solid #e8e4dd;
+      border-radius: 10px;
+      font-size: 1rem;
+      background: #faf8f5;
+    }
+    
+    .input-group input:focus {
+      border-color: #4a7c59;
+      background: white;
+    }
+    
+    .input-icon {
+      position: absolute;
+      left: 14px;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 1.1rem;
+    }
+    
+    .password-toggle {
+      position: absolute;
+      right: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      background: none;
+      border: none;
+      cursor: pointer;
+      font-size: 1.1rem;
+    }
+    
+    .auth-submit-btn {
+      width: 100%;
+      padding: 14px;
+      background: #4a7c59;
+      color: white;
+      border: none;
+      border-radius: 10px;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      margin-top: 8px;
+    }
+    
+    .auth-submit-btn:hover { background: #3d6849; }
+    .auth-submit-btn:disabled { opacity: 0.7; cursor: not-allowed; }
+    
+    .auth-switch {
+      text-align: center;
+      margin-top: 20px;
+      padding-top: 20px;
+      border-top: 1px solid #e8e4dd;
+      color: #6b6560;
+      font-size: 0.9rem;
+    }
+    
+    .switch-btn {
+      background: none;
+      border: none;
+      color: #4a7c59;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    
+    /* High contrast mode */
+    .high-contrast { filter: contrast(1.2); }
+  </style>
+  
+  <!-- Apply saved preferences immediately -->
+  <script>
+    (function() {
+      try {
+        var prefs = JSON.parse(localStorage.getItem('accessNature_displayPrefs') || '{}');
+        if (prefs.highContrast) document.documentElement.classList.add('high-contrast');
+      } catch(e) {}
+    })();
+  </script>
+</head>
+<body>
+  <!-- Skip to main content -->
+  <a href="#main-content" class="skip-link">Skip to main content</a>
+  
+  <!-- Top Navigation (minimal - brand only) -->
+  <nav class="top-nav" role="navigation" aria-label="Main navigation">
+    <a href="index.html" class="nav-brand">
+      <span aria-hidden="true">♿</span>
+      <span>Accessible</span>
+    </a>
+  </nav>
+  
+  <!-- Main Content -->
+  <main id="main-content" class="home-dashboard">
+    <div class="home-container">
+      
+      <!-- Greeting Section -->
+      <section class="home-greeting" aria-label="Welcome">
+        <h1 class="home-greeting-text" id="greetingText">Welcome to Accessible</h1>
+        <p class="home-greeting-sub">Making outdoor spaces accessible for everyone</p>
+      </section>
+      
+      <!-- Main Module Cards -->
+      <section class="home-modules" aria-label="Main features">
+        
+        <!-- Trails Module -->
+        <article class="home-module-card trails">
+          <div class="module-header">
+            <div class="module-icon" aria-hidden="true">🥾</div>
+            <div class="module-title-group">
+              <h2 class="module-title">Accessible Trails</h2>
+              <p class="module-desc">Discover and document wheelchair-accessible nature trails with detailed guides.</p>
+            </div>
+          </div>
+          
+          <div class="module-stats">
+            <div class="module-stat">
+              <span class="module-stat-value" id="trailCount">--</span>
+              <span class="module-stat-label">Trails</span>
+            </div>
+            <div class="module-stat">
+              <span class="module-stat-value" id="trailKm">--</span>
+              <span class="module-stat-label">km mapped</span>
+            </div>
+            <div class="module-stat">
+              <span class="module-stat-value" id="wheelchairCount">--</span>
+              <span class="module-stat-label">♿ Accessible</span>
+            </div>
+          </div>
+          
+          <a href="map.html?mode=trails" class="module-action">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
+            Explore Trails
+          </a>
+        </article>
+        
+        <!-- Reports Module -->
+        <article class="home-module-card reports">
+          <div class="module-header">
+            <div class="module-icon" aria-hidden="true">⚠️</div>
+            <div class="module-title-group">
+              <h2 class="module-title">Accessibility Reports</h2>
+              <p class="module-desc">Report and find urban accessibility barriers, hazards, and helpful features.</p>
+            </div>
+          </div>
+          
+          <div class="module-stats">
+            <div class="module-stat">
+              <span class="module-stat-value" id="reportCount">--</span>
+              <span class="module-stat-label">Reports</span>
+            </div>
+            <div class="module-stat">
+              <span class="module-stat-value" id="resolvedCount">--</span>
+              <span class="module-stat-label">Resolved</span>
+            </div>
+            <div class="module-stat">
+              <span class="module-stat-value" id="activeCount">--</span>
+              <span class="module-stat-label">Active</span>
+            </div>
+          </div>
+          
+          <a href="map.html?mode=urban" class="module-action">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2C8.14 2 5 5.14 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.86-3.14-7-7-7zm1 11h-2v-2h2v2zm0-4h-2V5h2v4z"/></svg>
+            View Reports
+          </a>
+        </article>
+        
+      </section>
+      
+      <!-- Quick Actions -->
+      <section class="home-quick-actions" aria-label="Quick actions">
+        <a href="map.html?mode=trails" class="quick-action">
+          <span class="quick-action-icon" aria-hidden="true">📍</span>
+          <span class="quick-action-text">Record a Trail</span>
+        </a>
+        <a href="map.html?mode=urban" class="quick-action">
+          <span class="quick-action-icon" aria-hidden="true">📝</span>
+          <span class="quick-action-text">Submit Report</span>
+        </a>
+      </section>
+      
+      <!-- Community Stats Banner -->
+      <section class="home-stats-banner" aria-label="Community statistics">
+        <h2 class="stats-banner-title">🌍 Community Impact</h2>
+        <div class="stats-banner-grid">
+          <div class="stats-banner-item">
+            <span class="stats-banner-value" id="totalContributors">--</span>
+            <span class="stats-banner-label">Contributors</span>
+          </div>
+          <div class="stats-banner-item">
+            <span class="stats-banner-value" id="totalGuides">--</span>
+            <span class="stats-banner-label">Guides</span>
+          </div>
+          <div class="stats-banner-item">
+            <span class="stats-banner-value" id="totalReports">--</span>
+            <span class="stats-banner-label">Reports</span>
+          </div>
+        </div>
+      </section>
+      
+      <!-- Recent Activity -->
+      <section class="home-section" aria-label="Recent activity">
+        <div class="home-section-header">
+          <h2 class="home-section-title">Recent Activity</h2>
+        </div>
+        
+        <div class="activity-list" id="activityList">
+          <!-- Activity items populated by JS -->
+          <div class="activity-empty">
+            <div class="activity-empty-icon">🌱</div>
+            <p>Activity will appear here as the community grows.</p>
+          </div>
+        </div>
+      </section>
+      
+      <!-- Tip Card (for new users) -->
+      <section class="home-tip-card" id="tipCard" aria-label="Getting started tip">
+        <button class="tip-dismiss" onclick="dismissTip()" aria-label="Dismiss tip">×</button>
+        <div class="tip-icon">💡</div>
+        <h3 class="tip-title">Getting Started</h3>
+        <p class="tip-text">Ready to make a difference? Start by exploring existing trails or recording your first accessible route!</p>
+        <a href="map.html?mode=trails" class="tip-action">
+          Open Map →
+        </a>
+      </section>
+      
+    </div>
+  </main>
+  
+  <!-- Auth Modal -->
+  <div id="authModal" class="auth-modal hidden" role="dialog" aria-labelledby="authModalTitle" aria-modal="true">
+    <div class="auth-modal-backdrop" onclick="closeAuthModal()"></div>
+    <div class="auth-modal-container">
+      <div class="auth-modal-header">
+        <h2 id="authModalTitle">Welcome to Accessible</h2>
+        <button class="auth-modal-close" onclick="closeAuthModal()" aria-label="Close">×</button>
+      </div>
+      
+      <!-- Login Form -->
+      <div id="loginForm" class="auth-form active">
+        <div class="auth-form-header">
+          <h3>Sign In</h3>
+          <p>Continue your accessibility journey</p>
+        </div>
+        
+        <form class="auth-inputs" id="loginFormElement">
+          <div class="input-group">
+            <label for="loginEmail" class="visually-hidden">Email</label>
+            <input type="email" id="loginEmail" placeholder="Email address" required autocomplete="email">
+            <span class="input-icon">📧</span>
+          </div>
+          <div class="input-group password-group">
+            <label for="loginPassword" class="visually-hidden">Password</label>
+            <input type="password" id="loginPassword" placeholder="Password" required autocomplete="current-password">
+            <span class="input-icon">🔒</span>
+            <button type="button" class="password-toggle" onclick="togglePassword('loginPassword', this)">👁️</button>
+          </div>
+          <button type="submit" id="loginBtn" class="auth-submit-btn">
+            <span class="btn-text">Sign In</span>
+          </button>
+        </form>
+        
+        <div class="auth-switch">
+          <p>Don't have an account? <button type="button" onclick="switchToSignup()" class="switch-btn">Sign up</button></p>
+        </div>
+      </div>
+      
+      <!-- Signup Form -->
+      <div id="signupForm" class="auth-form">
+        <div class="auth-form-header">
+          <h3>Create Account</h3>
+          <p>Join the community</p>
+        </div>
+        
+        <form class="auth-inputs" id="signupFormElement">
+          <div class="input-group">
+            <label for="signupName" class="visually-hidden">Name</label>
+            <input type="text" id="signupName" placeholder="Your name" required autocomplete="name">
+            <span class="input-icon">👤</span>
+          </div>
+          <div class="input-group">
+            <label for="signupEmail" class="visually-hidden">Email</label>
+            <input type="email" id="signupEmail" placeholder="Email address" required autocomplete="email">
+            <span class="input-icon">📧</span>
+          </div>
+          <div class="input-group password-group">
+            <label for="signupPassword" class="visually-hidden">Password</label>
+            <input type="password" id="signupPassword" placeholder="Create password" required autocomplete="new-password">
+            <span class="input-icon">🔒</span>
+            <button type="button" class="password-toggle" onclick="togglePassword('signupPassword', this)">👁️</button>
+          </div>
+          <button type="submit" id="signupBtn" class="auth-submit-btn">
+            <span class="btn-text">Create Account</span>
+          </button>
+        </form>
+        
+        <div class="auth-switch">
+          <p>Already have an account? <button type="button" onclick="switchToLogin()" class="switch-btn">Sign in</button></p>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Helper Scripts -->
+  <script>
+    // Auth modal helpers
+    function closeAuthModal() {
+      document.getElementById('authModal')?.classList.add('hidden');
+    }
+    function switchToSignup() {
+      document.getElementById('loginForm')?.classList.remove('active');
+      document.getElementById('signupForm')?.classList.add('active');
+    }
+    function switchToLogin() {
+      document.getElementById('signupForm')?.classList.remove('active');
+      document.getElementById('loginForm')?.classList.add('active');
+    }
+    function togglePassword(inputId, btn) {
+      const input = document.getElementById(inputId);
+      if (input.type === 'password') {
+        input.type = 'text';
+        btn.textContent = '🙈';
+      } else {
+        input.type = 'password';
+        btn.textContent = '👁️';
+      }
+    }
+    
+    // Expose for bottom nav
+    window.openAuthModal = function() {
+      document.getElementById('authModal')?.classList.remove('hidden');
+    };
+    
+    // Dismiss tip card
+    function dismissTip() {
+      document.getElementById('tipCard').style.display = 'none';
+      localStorage.setItem('accessNature_tipDismissed', 'true');
+    }
+    
+    // Hide tip if already dismissed
+    if (localStorage.getItem('accessNature_tipDismissed') === 'true') {
+      document.addEventListener('DOMContentLoaded', () => {
+        const tipCard = document.getElementById('tipCard');
+        if (tipCard) tipCard.style.display = 'none';
+      });
+    }
+    
+    // Dynamic greeting based on time
+    function updateGreeting() {
+      const hour = new Date().getHours();
+      const greetingEl = document.getElementById('greetingText');
+      if (!greetingEl) return;
+      
+      let greeting = 'Welcome';
+      if (hour >= 5 && hour < 12) greeting = 'Good morning';
+      else if (hour >= 12 && hour < 17) greeting = 'Good afternoon';
+      else if (hour >= 17 && hour < 21) greeting = 'Good evening';
+      else greeting = 'Good night';
+      
+      // Check if user is signed in
+      const userName = localStorage.getItem('accessNature_userName');
+      if (userName) {
+        greetingEl.textContent = `${greeting}, ${userName}`;
+      } else {
+        greetingEl.textContent = `${greeting}!`;
+      }
+    }
+    updateGreeting();
+  </script>
+  
+  <!-- Firebase Setup -->
+  <script type="module" src="firebase-setup.js"></script>
+  
+  <!-- Auth & Stats -->
+  <script type="module">
+    import { auth, db } from './firebase-setup.js';
+    import { onAuthStateChanged, signInWithEmailAndPassword, createUserWithEmailAndPassword, updateProfile } from 'https://www.gstatic.com/firebasejs/10.5.0/firebase-auth.js';
+    import { collection, query, where, getDocs, orderBy, limit } from 'https://www.gstatic.com/firebasejs/10.5.0/firebase-firestore.js';
+    
+    // Auth state listener
+    onAuthStateChanged(auth, (user) => {
+      if (user) {
+        const name = user.displayName || user.email?.split('@')[0] || 'Explorer';
+        localStorage.setItem('accessNature_userName', name);
+        updateGreeting();
+        
+        // Hide tip for returning users
+        const tipCard = document.getElementById('tipCard');
+        if (tipCard) tipCard.style.display = 'none';
+      } else {
+        localStorage.removeItem('accessNature_userName');
+        updateGreeting();
+      }
+    });
+    
+    // Login form
+    document.getElementById('loginFormElement')?.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const email = document.getElementById('loginEmail').value;
+      const password = document.getElementById('loginPassword').value;
+      const btn = document.getElementById('loginBtn');
+      
+      try {
+        btn.disabled = true;
+        btn.querySelector('.btn-text').textContent = 'Signing in...';
+        await signInWithEmailAndPassword(auth, email, password);
+        closeAuthModal();
+      } catch (error) {
+        alert('Sign in failed: ' + error.message);
+      } finally {
+        btn.disabled = false;
+        btn.querySelector('.btn-text').textContent = 'Sign In';
+      }
+    });
+    
+    // Signup form
+    document.getElementById('signupFormElement')?.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const name = document.getElementById('signupName').value;
+      const email = document.getElementById('signupEmail').value;
+      const password = document.getElementById('signupPassword').value;
+      const btn = document.getElementById('signupBtn');
+      
+      try {
+        btn.disabled = true;
+        btn.querySelector('.btn-text').textContent = 'Creating...';
+        const result = await createUserWithEmailAndPassword(auth, email, password);
+        await updateProfile(result.user, { displayName: name });
+        closeAuthModal();
+      } catch (error) {
+        alert('Sign up failed: ' + error.message);
+      } finally {
+        btn.disabled = false;
+        btn.querySelector('.btn-text').textContent = 'Create Account';
+      }
+    });
+    
+    // Load community stats
+    async function loadStats() {
+      try {
+        // Trail guides count
+        const guidesQuery = query(collection(db, 'trail_guides'), where('isPublic', '==', true));
+        const guidesSnap = await getDocs(guidesQuery);
+        
+        let totalKm = 0;
+        let wheelchairAccessible = 0;
+        const contributors = new Set();
+        
+        guidesSnap.forEach(doc => {
+          const data = doc.data();
+          if (data.distance) totalKm += parseFloat(data.distance) || 0;
+          if (data.userId) contributors.add(data.userId);
+          if (data.accessibilityData?.wheelchairAccessible === 'yes' || 
+              data.accessibilityData?.wheelchairAccessible === 'partial') {
+            wheelchairAccessible++;
+          }
+        });
+        
+        // Update trail stats
+        document.getElementById('trailCount').textContent = guidesSnap.size;
+        document.getElementById('trailKm').textContent = totalKm.toFixed(1);
+        document.getElementById('wheelchairCount').textContent = wheelchairAccessible;
+        
+        // Reports count (placeholder - would need reports collection)
+        document.getElementById('reportCount').textContent = '0';
+        document.getElementById('resolvedCount').textContent = '0';
+        document.getElementById('activeCount').textContent = '0';
+        
+        // Community totals
+        document.getElementById('totalContributors').textContent = contributors.size;
+        document.getElementById('totalGuides').textContent = guidesSnap.size;
+        document.getElementById('totalReports').textContent = '0';
+        
+      } catch (error) {
+        console.log('Stats loading error:', error);
+        // Leave as -- on error
+      }
+    }
+    
+    loadStats();
+    
+    // Handle signin URL param
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('signin') === 'true') {
+      window.history.replaceState({}, document.title, window.location.pathname);
+      setTimeout(() => window.openAuthModal?.(), 500);
+    }
+  </script>
+  
+  <!-- Global Bottom Navigation -->
+  <script type="module">
+    import { initGlobalNav } from './src/components/globalNav.js';
+    initGlobalNav({ currentPage: 'home' });
+  </script>
+</body>
+</html>
