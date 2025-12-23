@@ -242,12 +242,16 @@
   <!-- Skip to main content -->
   <a href="#main-content" class="skip-link">Skip to main content</a>
   
-  <!-- Top Navigation (minimal - brand only) -->
-  <nav class="top-nav" role="navigation" aria-label="Main navigation">
+  <!-- Top Navigation -->
+  <nav class="top-nav" role="navigation" aria-label="Main navigation" style="justify-content:space-between;padding:0 16px;">
     <a href="index.html" class="nav-brand">
       <span aria-hidden="true">♿</span>
       <span>Accessible</span>
     </a>
+    <div id="userIndicator" style="display:flex;align-items:center;gap:8px;">
+      <span id="userNameDisplay" style="font-size:0.875rem;color:#6b6560;max-width:100px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;"></span>
+      <div id="userAvatar" onclick="handleUserClick()" style="width:36px;height:36px;background:#e8e4dd;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:600;font-size:0.9rem;cursor:pointer;color:#6b6560;">?</div>
+    </div>
   </nav>
   
   <!-- Main Content -->
@@ -539,19 +543,55 @@
     
     // Auth state listener
     onAuthStateChanged(auth, (user) => {
-      if (user) {
+      const avatar = document.getElementById('userAvatar');
+      const nameDisplay = document.getElementById('userNameDisplay');
+      
+      if (user && !user.isAnonymous) {
         const name = user.displayName || user.email?.split('@')[0] || 'Explorer';
         localStorage.setItem('accessNature_userName', name);
         updateGreeting();
         
+        // Update user indicator
+        if (avatar) {
+          avatar.textContent = name.charAt(0).toUpperCase();
+          avatar.style.background = '#4a7c59';
+          avatar.style.color = 'white';
+        }
+        if (nameDisplay) {
+          nameDisplay.textContent = name;
+          nameDisplay.style.color = '#2d2a26';
+        }
+        
         // Hide tip for returning users
         const tipCard = document.getElementById('tipCard');
         if (tipCard) tipCard.style.display = 'none';
+        
+        // Reload stats for signed-in user
+        loadStats();
       } else {
         localStorage.removeItem('accessNature_userName');
         updateGreeting();
+        
+        // Reset user indicator
+        if (avatar) {
+          avatar.textContent = '?';
+          avatar.style.background = '#e8e4dd';
+          avatar.style.color = '#6b6560';
+        }
+        if (nameDisplay) {
+          nameDisplay.textContent = '';
+        }
       }
     });
+    
+    // Handle user avatar click
+    window.handleUserClick = function() {
+      if (auth.currentUser && !auth.currentUser.isAnonymous) {
+        window.location.href = 'profile.html';
+      } else {
+        window.openAuthModal?.();
+      }
+    };
     
     // Login form
     document.getElementById('loginFormElement')?.addEventListener('submit', async (e) => {
@@ -609,9 +649,11 @@
         guidesSnap.forEach(doc => {
           const data = doc.data();
           if (data.distance) totalKm += parseFloat(data.distance) || 0;
+          if (data.totalDistance) totalKm += (parseFloat(data.totalDistance) || 0) / 1000;
           if (data.userId) contributors.add(data.userId);
           if (data.accessibilityData?.wheelchairAccessible === 'yes' || 
-              data.accessibilityData?.wheelchairAccessible === 'partial') {
+              data.accessibilityData?.wheelchairAccessible === 'partial' ||
+              data.overallRating === 'excellent' || data.overallRating === 'good') {
             wheelchairAccessible++;
           }
         });
@@ -621,15 +663,33 @@
         document.getElementById('trailKm').textContent = totalKm.toFixed(1);
         document.getElementById('wheelchairCount').textContent = wheelchairAccessible;
         
-        // Reports count (placeholder - would need reports collection)
-        document.getElementById('reportCount').textContent = '0';
-        document.getElementById('resolvedCount').textContent = '0';
-        document.getElementById('activeCount').textContent = '0';
+        // Reports count - query accessibility_reports collection
+        const reportsQuery = query(collection(db, 'accessibility_reports'), orderBy('createdAt', 'desc'), limit(500));
+        const reportsSnap = await getDocs(reportsQuery);
+        
+        let resolvedCount = 0;
+        let activeCount = 0;
+        
+        reportsSnap.forEach(doc => {
+          const data = doc.data();
+          if (data.userId) contributors.add(data.userId);
+          if (data.status === 'resolved' || data.status === 'fixed') {
+            resolvedCount++;
+          } else {
+            activeCount++;
+          }
+        });
+        
+        document.getElementById('reportCount').textContent = reportsSnap.size;
+        document.getElementById('resolvedCount').textContent = resolvedCount;
+        document.getElementById('activeCount').textContent = activeCount;
         
         // Community totals
         document.getElementById('totalContributors').textContent = contributors.size;
         document.getElementById('totalGuides').textContent = guidesSnap.size;
-        document.getElementById('totalReports').textContent = '0';
+        document.getElementById('totalReports').textContent = reportsSnap.size;
+        
+        console.log('[Stats] Loaded:', guidesSnap.size, 'trails,', reportsSnap.size, 'reports');
         
       } catch (error) {
         console.log('Stats loading error:', error);
