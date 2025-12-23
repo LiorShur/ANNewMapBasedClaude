@@ -4,26 +4,15 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>Accessible - Map</title>
-  
-  <!-- PWA Meta Tags -->
   <meta name="theme-color" content="#1a1a1a">
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <link rel="manifest" href="manifest.json">
-  
-  <!-- Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
-  
-  <!-- Leaflet -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.3/dist/leaflet.css">
-  
-  <!-- App CSS -->
   <link rel="stylesheet" href="src/css/global-nav.css">
-  
-  <!-- Apply saved preferences -->
   <script>
     (function() {
       try {
@@ -32,675 +21,179 @@
       } catch(e) {}
     })();
   </script>
-  
   <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    
-    body {
-      font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, sans-serif;
-      background: #1a1a1a;
-      color: #ffffff;
-      overflow: hidden;
-      height: 100vh;
-      height: 100dvh;
-    }
-    
-    .visually-hidden {
-      position: absolute;
-      width: 1px;
-      height: 1px;
-      padding: 0;
-      margin: -1px;
-      overflow: hidden;
-      clip: rect(0, 0, 0, 0);
-      border: 0;
-    }
-    
-    button:focus-visible, a:focus-visible {
-      outline: 3px solid #4CAF50;
-      outline-offset: 2px;
-    }
-    
-    /* Top bar */
-    .top-bar {
-      position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
-      height: 56px;
-      background: rgba(26, 26, 26, 0.95);
-      backdrop-filter: blur(10px);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      z-index: 1000;
-      border-bottom: 1px solid rgba(255,255,255,0.1);
-    }
-    
-    .top-bar-brand {
-      font-size: 1.125rem;
-      font-weight: 600;
-      color: #ffffff;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-    
-    /* Map */
-    #map {
-      position: fixed;
-      top: 56px;
-      left: 0;
-      right: 0;
-      bottom: 64px;
-      z-index: 1;
-    }
-    
-    /* Mode toggle */
-    .map-mode-toggle {
-      position: fixed;
-      top: 70px;
-      left: 50%;
-      transform: translateX(-50%);
-      display: flex;
-      background: rgba(26, 26, 26, 0.95);
-      border-radius: 25px;
-      padding: 4px;
-      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
-      z-index: 1000;
-      backdrop-filter: blur(10px);
-      border: 1px solid rgba(255, 255, 255, 0.1);
-    }
-    
-    .mode-btn {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      padding: 10px 20px;
-      border: none;
-      background: transparent;
-      color: rgba(255, 255, 255, 0.6);
-      font-size: 14px;
-      font-weight: 600;
-      cursor: pointer;
-      border-radius: 21px;
-      transition: all 0.25s ease;
-    }
-    
-    .mode-btn:hover { color: rgba(255, 255, 255, 0.9); }
-    .mode-btn.active { color: #ffffff; }
-    .mode-btn.active.trails { background: #4CAF50; }
-    .mode-btn.active.urban { background: #FF9800; }
-    .mode-btn svg { width: 18px; height: 18px; fill: currentColor; }
-    
-    /* Map controls */
-    .map-controls {
-      position: fixed;
-      right: 16px;
-      top: 130px;
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-      z-index: 900;
-    }
-    
-    .map-control-btn {
-      width: 44px;
-      height: 44px;
-      background: rgba(26, 26, 26, 0.9);
-      border: 1px solid rgba(255,255,255,0.2);
-      border-radius: 10px;
-      color: #ffffff;
-      font-size: 20px;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      transition: all 0.2s ease;
-    }
-    
-    .map-control-btn:hover { background: rgba(60, 60, 60, 0.95); }
-    .map-control-btn:active { transform: scale(0.95); }
-    
-    /* FAB */
-    .context-fab {
-      position: fixed;
-      bottom: calc(64px + 20px + env(safe-area-inset-bottom, 0));
-      right: 20px;
-      height: 56px;
-      padding: 0 24px;
-      border: none;
-      border-radius: 28px;
-      color: #ffffff;
-      font-size: 15px;
-      font-weight: 600;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      z-index: 1010;
-      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
-      transition: all 0.3s ease;
-    }
-    
-    .context-fab:hover { transform: scale(1.05); }
-    .context-fab:active { transform: scale(0.98); }
-    .context-fab svg { width: 22px; height: 22px; fill: currentColor; }
-    .context-fab.trails { background: #4CAF50; box-shadow: 0 4px 16px rgba(76, 175, 80, 0.4); }
-    .context-fab.urban { background: #FF9800; box-shadow: 0 4px 16px rgba(255, 152, 0, 0.4); }
-    .context-fab.hidden { transform: translateY(100px); opacity: 0; pointer-events: none; }
-    
-    /* Layer container */
-    .layer-container { transition: opacity 0.3s ease; }
-    .layer-container.hidden { opacity: 0; pointer-events: none; display: none !important; }
-    
-    /* Status bar */
-    .status-bar {
-      position: fixed;
-      bottom: calc(64px + 90px + env(safe-area-inset-bottom, 0));
-      left: 16px;
-      right: 16px;
-      background: rgba(26, 26, 26, 0.95);
-      border-radius: 16px;
-      padding: 16px;
-      display: flex;
-      justify-content: space-around;
-      z-index: 900;
-      backdrop-filter: blur(10px);
-      border: 1px solid rgba(255,255,255,0.1);
-    }
-    .status-bar.hidden { display: none; }
-    .status-item { text-align: center; }
-    .status-value { font-size: 1.5rem; font-weight: 700; color: #4CAF50; }
-    .status-label { font-size: 0.75rem; color: rgba(255,255,255,0.6); text-transform: uppercase; }
-    
-    /* Tracking controls */
-    .tracking-controls {
-      position: fixed;
-      bottom: calc(64px + 20px + env(safe-area-inset-bottom, 0));
-      left: 50%;
-      transform: translateX(-50%);
-      display: flex;
-      gap: 16px;
-      z-index: 1010;
-    }
-    .tracking-controls.hidden { display: none; }
-    
-    .tracking-btn {
-      width: 64px;
-      height: 64px;
-      border-radius: 50%;
-      border: none;
-      font-size: 24px;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      transition: all 0.2s ease;
-    }
-    .tracking-btn.stop { background: #f44336; color: white; }
-    .tracking-btn.pause { background: #FF9800; color: white; }
-    .tracking-btn:hover { transform: scale(1.1); }
-    
-    /* Filter pills */
-    .filter-pills {
-      position: fixed;
-      top: 120px;
-      left: 16px;
-      right: 16px;
-      display: flex;
-      gap: 8px;
-      overflow-x: auto;
-      padding: 8px 0;
-      z-index: 800;
-      scrollbar-width: none;
-    }
-    .filter-pills::-webkit-scrollbar { display: none; }
-    
-    .filter-pill {
-      padding: 8px 16px;
-      background: rgba(26, 26, 26, 0.9);
-      border: 1px solid rgba(255,255,255,0.2);
-      border-radius: 20px;
-      color: rgba(255,255,255,0.8);
-      font-size: 13px;
-      font-weight: 500;
-      white-space: nowrap;
-      cursor: pointer;
-      transition: all 0.2s ease;
-    }
-    .filter-pill:hover { background: rgba(60, 60, 60, 0.95); }
-    .filter-pill.active { background: #FF9800; border-color: #FF9800; color: white; }
-    
-    /* Locate button */
-    .locate-btn {
-      position: fixed;
-      left: 16px;
-      bottom: calc(64px + 20px + env(safe-area-inset-bottom, 0));
-      width: 48px;
-      height: 48px;
-      background: rgba(26, 26, 26, 0.95);
-      border: 1px solid rgba(255,255,255,0.2);
-      border-radius: 50%;
-      color: #ffffff;
-      font-size: 20px;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      z-index: 900;
-    }
-    .locate-btn:hover { background: rgba(60, 60, 60, 0.95); }
-    .locate-btn.active { color: #4CAF50; border-color: #4CAF50; }
-    
-    /* Toast */
-    .toast {
-      position: fixed;
-      bottom: calc(64px + 90px);
-      left: 50%;
-      transform: translateX(-50%) translateY(100px);
-      background: rgba(26, 26, 26, 0.95);
-      color: white;
-      padding: 12px 24px;
-      border-radius: 25px;
-      font-size: 14px;
-      font-weight: 500;
-      z-index: 2000;
-      opacity: 0;
-      transition: all 0.3s ease;
-    }
-    .toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
-    .toast.success { background: rgba(76, 175, 80, 0.95); }
-    .toast.error { background: rgba(244, 67, 54, 0.95); }
-    
-    /* Leaflet */
-    .leaflet-control-zoom { display: none !important; }
-    .leaflet-control-attribution { font-size: 10px !important; background: rgba(26, 26, 26, 0.8) !important; color: rgba(255,255,255,0.5) !important; }
-    
-    /* Markers */
-    .user-marker { width: 20px !important; height: 20px !important; background: #2196F3; border: 3px solid white; border-radius: 50%; box-shadow: 0 0 0 8px rgba(33, 150, 243, 0.3); }
-    .trail-marker { background: #4CAF50; border: 3px solid white; border-radius: 50%; width: 16px !important; height: 16px !important; }
-    .report-marker { width: 32px !important; height: 32px !important; display: flex; align-items: center; justify-content: center; font-size: 18px; background: #FF9800; border: 2px solid white; border-radius: 50%; }
-    
-    /* Auth Modal */
-    .auth-modal { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.7); display: flex; align-items: center; justify-content: center; z-index: 20000; padding: 16px; }
-    .auth-modal.hidden { display: none; }
-    .auth-modal-container { background: #1a1a1a; border-radius: 20px; width: 100%; max-width: 400px; border: 1px solid rgba(255,255,255,0.1); }
-    .auth-modal-header { padding: 20px; border-bottom: 1px solid rgba(255,255,255,0.1); display: flex; justify-content: space-between; align-items: center; }
-    .auth-modal-header h2 { font-size: 1.25rem; margin: 0; }
-    .auth-modal-close { width: 36px; height: 36px; border: none; background: rgba(255,255,255,0.1); border-radius: 50%; font-size: 1.25rem; color: white; cursor: pointer; }
-    .auth-form { display: none; padding: 20px; }
-    .auth-form.active { display: block; }
-    .auth-form-header { text-align: center; margin-bottom: 24px; }
-    .auth-form-header h3 { font-size: 1.125rem; margin-bottom: 4px; }
-    .auth-form-header p { color: rgba(255,255,255,0.6); font-size: 0.9rem; }
-    .auth-inputs { display: flex; flex-direction: column; gap: 12px; }
-    .input-group { position: relative; }
-    .input-group input { width: 100%; padding: 14px 16px 14px 44px; border: 1px solid rgba(255,255,255,0.2); border-radius: 10px; font-size: 1rem; background: rgba(255,255,255,0.05); color: white; }
-    .input-group input:focus { border-color: #4CAF50; outline: none; }
-    .input-icon { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); font-size: 1.1rem; }
-    .password-toggle { position: absolute; right: 12px; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer; font-size: 1.1rem; }
-    .auth-submit-btn { width: 100%; padding: 14px; background: #4CAF50; color: white; border: none; border-radius: 10px; font-size: 1rem; font-weight: 600; cursor: pointer; margin-top: 8px; }
-    .auth-submit-btn:hover { background: #43a047; }
-    .auth-switch { text-align: center; margin-top: 20px; padding-top: 20px; border-top: 1px solid rgba(255,255,255,0.1); color: rgba(255,255,255,0.6); font-size: 0.9rem; }
-    .switch-btn { background: none; border: none; color: #4CAF50; font-weight: 600; cursor: pointer; }
+    *{box-sizing:border-box;margin:0;padding:0}
+    :root{--bg-primary:#1a1a1a;--bg-secondary:#242424;--bg-tertiary:#2d2d2d;--text-primary:#fff;--text-secondary:rgba(255,255,255,.7);--text-muted:rgba(255,255,255,.5);--border-color:rgba(255,255,255,.1);--accent-trails:#4CAF50;--accent-urban:#FF9800;--accent-blue:#2196F3;--error:#f44336}
+    body{font-family:'DM Sans',-apple-system,sans-serif;background:var(--bg-primary);color:var(--text-primary);overflow:hidden;height:100vh;height:100dvh}
+    .visually-hidden{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);border:0}
+    button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{outline:3px solid var(--accent-trails);outline-offset:2px}
+    .top-bar{position:fixed;top:0;left:0;right:0;height:56px;background:rgba(26,26,26,.95);backdrop-filter:blur(10px);display:flex;align-items:center;justify-content:center;z-index:1000;border-bottom:1px solid var(--border-color)}
+    .top-bar-brand{font-size:1.125rem;font-weight:600;display:flex;align-items:center;gap:8px}
+    #map{position:fixed;top:56px;left:0;right:0;bottom:64px;z-index:1}
+    .map-mode-toggle{position:fixed;top:70px;left:50%;transform:translateX(-50%);display:flex;background:rgba(26,26,26,.95);border-radius:25px;padding:4px;box-shadow:0 4px 20px rgba(0,0,0,.4);z-index:1000;backdrop-filter:blur(10px);border:1px solid var(--border-color)}
+    .mode-btn{display:flex;align-items:center;gap:6px;padding:10px 20px;border:none;background:transparent;color:var(--text-secondary);font-size:14px;font-weight:600;cursor:pointer;border-radius:21px;transition:all .25s}
+    .mode-btn:hover{color:var(--text-primary)}.mode-btn.active{color:var(--text-primary)}.mode-btn.active.trails{background:var(--accent-trails)}.mode-btn.active.urban{background:var(--accent-urban)}.mode-btn svg{width:18px;height:18px;fill:currentColor}
+    .map-controls{position:fixed;right:16px;top:130px;display:flex;flex-direction:column;gap:8px;z-index:900}
+    .map-control-btn{width:44px;height:44px;background:rgba(26,26,26,.9);border:1px solid var(--border-color);border-radius:10px;color:var(--text-primary);font-size:20px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .2s}
+    .map-control-btn:hover{background:var(--bg-tertiary)}.map-control-btn:active{transform:scale(.95)}
+    .context-fab{position:fixed;bottom:calc(64px + 20px + env(safe-area-inset-bottom,0));right:20px;height:56px;padding:0 24px;border:none;border-radius:28px;color:var(--text-primary);font-size:15px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:8px;z-index:1010;box-shadow:0 4px 16px rgba(0,0,0,.3);transition:all .3s}
+    .context-fab:hover{transform:scale(1.05)}.context-fab:active{transform:scale(.98)}.context-fab svg{width:22px;height:22px;fill:currentColor}.context-fab.trails{background:var(--accent-trails)}.context-fab.urban{background:var(--accent-urban)}.context-fab.hidden{transform:translateY(100px);opacity:0;pointer-events:none}
+    .layer-container{transition:opacity .3s}.layer-container.hidden{opacity:0;pointer-events:none;display:none!important}
+    .status-bar{position:fixed;bottom:calc(64px + 90px + env(safe-area-inset-bottom,0));left:16px;right:16px;background:rgba(26,26,26,.95);border-radius:16px;padding:16px;display:flex;justify-content:space-around;z-index:900;backdrop-filter:blur(10px);border:1px solid var(--border-color)}.status-bar.hidden{display:none}.status-item{text-align:center}.status-value{font-size:1.5rem;font-weight:700;color:var(--accent-trails)}.status-label{font-size:.75rem;color:var(--text-muted);text-transform:uppercase}
+    .tracking-controls{position:fixed;bottom:calc(64px + 20px + env(safe-area-inset-bottom,0));left:50%;transform:translateX(-50%);display:flex;gap:16px;z-index:1010}.tracking-controls.hidden{display:none}
+    .tracking-btn{width:64px;height:64px;border-radius:50%;border:none;font-size:24px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .2s}.tracking-btn.stop{background:var(--error);color:#fff}.tracking-btn.pause{background:var(--accent-urban);color:#fff}.tracking-btn:hover{transform:scale(1.1)}
+    .filter-pills{position:fixed;top:120px;left:16px;right:16px;display:flex;gap:8px;overflow-x:auto;padding:8px 0;z-index:800;scrollbar-width:none}.filter-pills::-webkit-scrollbar{display:none}
+    .filter-pill{padding:8px 16px;background:rgba(26,26,26,.9);border:1px solid var(--border-color);border-radius:20px;color:var(--text-secondary);font-size:13px;font-weight:500;white-space:nowrap;cursor:pointer;transition:all .2s}.filter-pill:hover{background:var(--bg-tertiary)}.filter-pill.active{background:var(--accent-urban);border-color:var(--accent-urban);color:#fff}
+    .locate-btn{position:fixed;left:16px;bottom:calc(64px + 20px + env(safe-area-inset-bottom,0));width:48px;height:48px;background:rgba(26,26,26,.95);border:1px solid var(--border-color);border-radius:50%;color:var(--text-primary);font-size:20px;cursor:pointer;display:flex;align-items:center;justify-content:center;z-index:900}.locate-btn:hover{background:var(--bg-tertiary)}.locate-btn.active{color:var(--accent-trails);border-color:var(--accent-trails)}
+    .toast{position:fixed;bottom:calc(64px + 90px);left:50%;transform:translateX(-50%) translateY(100px);background:rgba(26,26,26,.95);color:#fff;padding:12px 24px;border-radius:25px;font-size:14px;font-weight:500;z-index:2000;opacity:0;transition:all .3s}.toast.show{transform:translateX(-50%) translateY(0);opacity:1}.toast.success{background:rgba(76,175,80,.95)}.toast.error{background:rgba(244,67,54,.95)}
+    .leaflet-control-zoom{display:none!important}.leaflet-control-attribution{font-size:10px!important;background:rgba(26,26,26,.8)!important;color:var(--text-muted)!important}
+    .user-marker{width:20px!important;height:20px!important;background:var(--accent-blue);border:3px solid #fff;border-radius:50%;box-shadow:0 0 0 8px rgba(33,150,243,.3)}.trail-marker{background:var(--accent-trails);border:3px solid #fff;border-radius:50%;width:16px!important;height:16px!important;box-shadow:0 2px 6px rgba(0,0,0,.3)}.report-marker{width:32px!important;height:32px!important;display:flex;align-items:center;justify-content:center;font-size:16px;background:var(--accent-urban);border:2px solid #fff;border-radius:50%;box-shadow:0 2px 6px rgba(0,0,0,.3)}
+    .modal-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.8);backdrop-filter:blur(4px);display:flex;align-items:flex-end;justify-content:center;z-index:10000;padding:0;opacity:0;pointer-events:none;transition:opacity .3s}.modal-overlay.open{opacity:1;pointer-events:auto}
+    .modal-container{background:var(--bg-primary);border-radius:24px 24px 0 0;width:100%;max-width:600px;max-height:90vh;overflow-y:auto;transform:translateY(100%);transition:transform .3s}.modal-overlay.open .modal-container{transform:translateY(0)}
+    @media(min-width:600px){.modal-overlay{align-items:center;padding:20px}.modal-container{border-radius:24px;max-height:85vh}}
+    .modal-header{position:sticky;top:0;background:var(--bg-primary);padding:20px 20px 16px;border-bottom:1px solid var(--border-color);display:flex;justify-content:space-between;align-items:center;z-index:10}.modal-header h2{font-size:1.25rem;font-weight:600;margin:0;display:flex;align-items:center;gap:10px}
+    .modal-close{width:40px;height:40px;border:none;background:var(--bg-tertiary);border-radius:50%;font-size:1.5rem;color:var(--text-secondary);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .2s}.modal-close:hover{background:var(--bg-secondary);color:var(--text-primary)}
+    .modal-body{padding:20px}.modal-footer{position:sticky;bottom:0;background:var(--bg-primary);padding:16px 20px;border-top:1px solid var(--border-color);display:flex;gap:12px}
+    .form-group{margin-bottom:20px}.form-label{display:block;margin-bottom:8px;font-weight:600;font-size:.95rem;color:var(--text-primary)}.form-hint{font-size:.85rem;color:var(--text-muted);margin-bottom:10px}
+    .form-input,.form-select,.form-textarea{width:100%;padding:14px 16px;background:var(--bg-secondary);border:1px solid var(--border-color);border-radius:12px;color:var(--text-primary);font-size:1rem;font-family:inherit;transition:all .2s}.form-input:focus,.form-select:focus,.form-textarea:focus{border-color:var(--accent-trails);outline:none}.form-input::placeholder,.form-textarea::placeholder{color:var(--text-muted)}
+    .form-select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='white'%3E%3Cpath d='M7 10l5 5 5-5z'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center;padding-right:40px}.form-textarea{min-height:100px;resize:vertical}
+    .btn{padding:14px 24px;border:none;border-radius:12px;font-size:1rem;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;transition:all .2s;flex:1}.btn-primary{background:var(--accent-trails);color:#fff}.btn-primary:hover{background:#43a047}.btn-primary.orange{background:var(--accent-urban)}.btn-primary.orange:hover{background:#f57c00}.btn-secondary{background:var(--bg-tertiary);color:var(--text-primary)}.btn-secondary:hover{background:var(--bg-secondary)}.btn:disabled{opacity:.6;cursor:not-allowed}
+    .severity-scale{display:flex;gap:8px}.severity-option{flex:1;display:flex;flex-direction:column;align-items:center;padding:12px 8px;background:var(--bg-secondary);border:2px solid var(--border-color);border-radius:12px;cursor:pointer;transition:all .2s}.severity-option:hover{border-color:var(--text-muted)}.severity-option.selected{border-color:var(--accent-urban);background:rgba(255,152,0,.1)}.severity-option input{display:none}.severity-option .severity-num{font-size:1.25rem;font-weight:700;margin-bottom:4px}.severity-option .severity-label{font-size:.7rem;font-weight:600;text-transform:uppercase}
+    .severity-option[data-value="1"] .severity-num{color:#22c55e}.severity-option[data-value="2"] .severity-num{color:#84cc16}.severity-option[data-value="3"] .severity-num{color:#f59e0b}.severity-option[data-value="4"] .severity-num{color:#ea580c}.severity-option[data-value="5"] .severity-num{color:#dc2626}
+    .toggle-options{display:flex;gap:12px}.toggle-option{flex:1;display:flex;align-items:center;gap:12px;padding:14px;background:var(--bg-secondary);border:2px solid var(--border-color);border-radius:12px;cursor:pointer;transition:all .2s}.toggle-option:hover{border-color:var(--text-muted)}.toggle-option.selected{border-color:var(--accent-blue);background:rgba(33,150,243,.1)}.toggle-option input{display:none}.toggle-option-icon{font-size:1.5rem}.toggle-option-text{font-weight:600;font-size:.9rem}.toggle-option-desc{font-size:.75rem;color:var(--text-muted)}
+    .rating-buttons{display:flex;gap:8px}.rating-btn{flex:1;padding:16px 12px;background:var(--bg-secondary);border:2px solid var(--border-color);border-radius:12px;cursor:pointer;text-align:center;transition:all .2s}.rating-btn:hover{border-color:var(--text-muted)}.rating-btn.selected{border-color:var(--accent-trails);background:rgba(76,175,80,.1)}.rating-btn-icon{font-size:2rem;margin-bottom:8px}.rating-btn-label{font-size:.85rem;font-weight:600}
+    .photo-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(80px,1fr));gap:8px;margin-top:12px}.photo-preview{aspect-ratio:1;border-radius:8px;overflow:hidden;position:relative}.photo-preview img{width:100%;height:100%;object-fit:cover}.photo-preview .remove-photo{position:absolute;top:4px;right:4px;width:24px;height:24px;background:rgba(0,0,0,.7);border:none;border-radius:50%;color:#fff;font-size:14px;cursor:pointer}
+    .map-picker{height:180px;border-radius:12px;overflow:hidden;margin-bottom:8px;border:1px solid var(--border-color)}
+    .loading-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:var(--bg-primary);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:50000;transition:opacity .3s}.loading-overlay.hidden{opacity:0;pointer-events:none}.loading-spinner{width:48px;height:48px;border:4px solid var(--border-color);border-top-color:var(--accent-trails);border-radius:50%;animation:spin 1s linear infinite}.loading-text{margin-top:16px;color:var(--text-secondary)}
+    .spinner{width:20px;height:20px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .8s linear infinite}
+    @keyframes spin{to{transform:rotate(360deg)}}
+    .trail-popup{min-width:200px}.trail-popup h3{margin:0 0 8px;font-size:1rem}.trail-popup-stats{display:flex;gap:12px;margin-bottom:8px;font-size:.85rem;color:#666}.trail-popup-btn{width:100%;padding:8px;background:var(--accent-trails);color:#fff;border:none;border-radius:6px;cursor:pointer;font-weight:600}
   </style>
 </head>
 <body class="map-page">
   <h1 class="visually-hidden">Accessible Map</h1>
-  
-  <!-- Top bar -->
-  <header class="top-bar">
-    <div class="top-bar-brand">
-      <span>♿</span>
-      <span>Accessible</span>
-    </div>
-  </header>
-  
-  <!-- Mode Toggle -->
+  <div class="loading-overlay" id="loadingOverlay"><div class="loading-spinner"></div><p class="loading-text">Loading map...</p></div>
+  <header class="top-bar"><div class="top-bar-brand"><span>♿</span><span>Accessible</span></div></header>
   <div class="map-mode-toggle" id="modeToggle">
-    <button class="mode-btn trails active" id="trailsModeBtn" onclick="setMode('trails')">
-      <svg viewBox="0 0 24 24"><path d="M13.5 5.5c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zM9.8 8.9L7 23h2.1l1.8-8 2.1 2v6h2v-7.5l-2.1-2 .6-3C14.8 12 16.8 13 19 13v-2c-1.9 0-3.5-1-4.3-2.4l-1-1.6c-.4-.6-1-1-1.7-1-.3 0-.5.1-.8.1L6 8.3V13h2V9.6l1.8-.7"/></svg>
-      Trails
-    </button>
-    <button class="mode-btn urban" id="urbanModeBtn" onclick="setMode('urban')">
-      <svg viewBox="0 0 24 24"><path d="M12 2C8.14 2 5 5.14 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.86-3.14-7-7-7zm1 11h-2v-2h2v2zm0-4h-2V5h2v4z"/></svg>
-      Urban
-    </button>
+    <button class="mode-btn trails active" id="trailsModeBtn" onclick="setMode('trails')"><svg viewBox="0 0 24 24"><path d="M13.5 5.5c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zM9.8 8.9L7 23h2.1l1.8-8 2.1 2v6h2v-7.5l-2.1-2 .6-3C14.8 12 16.8 13 19 13v-2c-1.9 0-3.5-1-4.3-2.4l-1-1.6c-.4-.6-1-1-1.7-1-.3 0-.5.1-.8.1L6 8.3V13h2V9.6l1.8-.7"/></svg>Trails</button>
+    <button class="mode-btn urban" id="urbanModeBtn" onclick="setMode('urban')"><svg viewBox="0 0 24 24"><path d="M12 2C8.14 2 5 5.14 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.86-3.14-7-7-7zm1 11h-2v-2h2v2zm0-4h-2V5h2v4z"/></svg>Urban</button>
   </div>
-  
-  <!-- Map -->
   <div id="map"></div>
-  
-  <!-- Map Controls -->
   <div class="map-controls">
     <button class="map-control-btn" onclick="zoomIn()">+</button>
     <button class="map-control-btn" onclick="zoomOut()">−</button>
+    <button class="map-control-btn" id="layerBtn" onclick="toggleMapStyle()">🗺️</button>
   </div>
-  
-  <!-- Locate button -->
   <button class="locate-btn" id="locateBtn" onclick="locateUser()">📍</button>
-  
-  <!-- TRAILS LAYER -->
   <div id="trailsLayer" class="layer-container">
-    <div class="status-bar hidden" id="trackingStatus">
-      <div class="status-item">
-        <div class="status-value" id="distanceValue">0.00</div>
-        <div class="status-label">km</div>
-      </div>
-      <div class="status-item">
-        <div class="status-value" id="durationValue">00:00</div>
-        <div class="status-label">time</div>
-      </div>
-      <div class="status-item">
-        <div class="status-value" id="speedValue">0.0</div>
-        <div class="status-label">km/h</div>
-      </div>
-    </div>
-    
-    <div class="tracking-controls hidden" id="trackingControls">
-      <button class="tracking-btn pause" onclick="pauseTracking()">⏸️</button>
-      <button class="tracking-btn stop" onclick="stopTracking()">⏹️</button>
-    </div>
-    
-    <button class="context-fab trails" id="trailsFab" onclick="startTracking()">
-      <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="12" cy="12" r="4"/></svg>
-      Record Trail
-    </button>
+    <div class="status-bar hidden" id="trackingStatus"><div class="status-item"><div class="status-value" id="distanceValue">0.00</div><div class="status-label">km</div></div><div class="status-item"><div class="status-value" id="durationValue">00:00</div><div class="status-label">time</div></div><div class="status-item"><div class="status-value" id="speedValue">0.0</div><div class="status-label">km/h</div></div></div>
+    <div class="tracking-controls hidden" id="trackingControls"><button class="tracking-btn pause" id="pauseBtn" onclick="pauseTracking()">⏸️</button><button class="tracking-btn stop" onclick="stopTracking()">⏹️</button></div>
+    <button class="context-fab trails" id="trailsFab" onclick="startTracking()"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="12" cy="12" r="4"/></svg>Record Trail</button>
   </div>
-  
-  <!-- URBAN LAYER -->
   <div id="urbanLayer" class="layer-container hidden">
-    <div class="filter-pills" id="filterPills">
-      <button class="filter-pill active" data-filter="all">All</button>
-      <button class="filter-pill" data-filter="barrier">🚧 Barriers</button>
-      <button class="filter-pill" data-filter="hazard">⚠️ Hazards</button>
-      <button class="filter-pill" data-filter="parking">♿ Parking</button>
-      <button class="filter-pill" data-filter="ramp">🔼 Ramps</button>
-    </div>
-    
-    <button class="context-fab urban" id="urbanFab" onclick="openReportModal()">
-      <svg viewBox="0 0 24 24"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>
-      Report Issue
-    </button>
+    <div class="filter-pills" id="filterPills"><button class="filter-pill active" data-filter="all">All</button><button class="filter-pill" data-filter="sidewalk">🚧 Sidewalks</button><button class="filter-pill" data-filter="building">🏢 Buildings</button><button class="filter-pill" data-filter="parking">🅿️ Parking</button><button class="filter-pill" data-filter="transit">🚌 Transit</button></div>
+    <button class="context-fab urban" id="urbanFab" onclick="openReportModal()"><svg viewBox="0 0 24 24"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>Report Issue</button>
   </div>
-  
-  <!-- Toast -->
   <div id="toast" class="toast"></div>
-  
-  <!-- Auth Modal -->
-  <div id="authModal" class="auth-modal hidden">
-    <div class="auth-modal-container">
-      <div class="auth-modal-header">
-        <h2>Welcome</h2>
-        <button class="auth-modal-close" onclick="closeAuthModal()">×</button>
-      </div>
-      <div id="loginForm" class="auth-form active">
-        <div class="auth-form-header">
-          <h3>Sign In</h3>
-          <p>Continue your journey</p>
-        </div>
-        <form class="auth-inputs" id="loginFormElement">
-          <div class="input-group">
-            <input type="email" id="loginEmail" placeholder="Email" required>
-            <span class="input-icon">📧</span>
-          </div>
-          <div class="input-group">
-            <input type="password" id="loginPassword" placeholder="Password" required>
-            <span class="input-icon">🔒</span>
-          </div>
-          <button type="submit" class="auth-submit-btn">Sign In</button>
+  <!-- REPORT MODAL -->
+  <div class="modal-overlay" id="reportModal">
+    <div class="modal-container">
+      <div class="modal-header"><h2>⚠️ Report Issue</h2><button class="modal-close" onclick="closeReportModal()">×</button></div>
+      <div class="modal-body">
+        <form id="reportForm">
+          <div class="form-group"><label class="form-label">📍 Location</label><div class="map-picker" id="reportMapPicker"></div><p class="form-hint" id="reportLocationText">Tap map to select location</p><input type="hidden" id="reportLat"><input type="hidden" id="reportLng"></div>
+          <div class="form-group"><label class="form-label" for="reportType">🏷️ Issue Type *</label><select class="form-select" id="reportType" required><option value="">Select issue type...</option><optgroup label="Sidewalk Issues"><option value="curb_ramp">Missing/Damaged Curb Ramp</option><option value="sidewalk_blocked">Blocked Sidewalk</option><option value="damaged_sidewalk">Damaged Sidewalk</option></optgroup><optgroup label="Building Access"><option value="inaccessible_entrance">Inaccessible Entrance</option><option value="broken_elevator">Broken Elevator/Lift</option><option value="stairs_only">Stairs Only Access</option></optgroup><optgroup label="Parking"><option value="parking_blocked">Blocked Accessible Parking</option><option value="no_parking">No Accessible Parking</option></optgroup><optgroup label="Transit"><option value="bus_stop">Inaccessible Bus Stop</option><option value="transit_station">Inaccessible Station</option></optgroup><optgroup label="Other"><option value="other">Other Issue</option></optgroup></select></div>
+          <div class="form-group"><label class="form-label">⚠️ Severity Level *</label><p class="form-hint">How much does this impact accessibility?</p><div class="severity-scale" id="severityScale"><label class="severity-option" data-value="1"><input type="radio" name="severity" value="1"><span class="severity-num">1</span><span class="severity-label">Minor</span></label><label class="severity-option" data-value="2"><input type="radio" name="severity" value="2"><span class="severity-num">2</span><span class="severity-label">Low</span></label><label class="severity-option selected" data-value="3"><input type="radio" name="severity" value="3" checked><span class="severity-num">3</span><span class="severity-label">Medium</span></label><label class="severity-option" data-value="4"><input type="radio" name="severity" value="4"><span class="severity-num">4</span><span class="severity-label">High</span></label><label class="severity-option" data-value="5"><input type="radio" name="severity" value="5"><span class="severity-num">5</span><span class="severity-label">Critical</span></label></div></div>
+          <div class="form-group"><label class="form-label">🕐 Duration</label><div class="toggle-options"><label class="toggle-option selected"><input type="radio" name="duration" value="permanent" checked><span class="toggle-option-icon">🏗️</span><div><div class="toggle-option-text">Permanent</div><div class="toggle-option-desc">Ongoing issue</div></div></label><label class="toggle-option"><input type="radio" name="duration" value="temporary"><span class="toggle-option-icon">⏳</span><div><div class="toggle-option-text">Temporary</div><div class="toggle-option-desc">Construction, etc.</div></div></label></div></div>
+          <div class="form-group"><label class="form-label" for="reportTitle">📝 Title *</label><input type="text" class="form-input" id="reportTitle" placeholder="Brief description" required></div>
+          <div class="form-group"><label class="form-label" for="reportDescription">📄 Description</label><textarea class="form-textarea" id="reportDescription" placeholder="Provide more details..."></textarea></div>
+          <div class="form-group"><label class="form-label">📷 Photos</label><input type="file" id="reportPhotos" accept="image/*" multiple hidden><button type="button" class="btn btn-secondary" onclick="document.getElementById('reportPhotos').click()">📸 Add Photos</button><div class="photo-grid" id="reportPhotoGrid"></div></div>
         </form>
-        <div class="auth-switch">
-          <p>No account? <button type="button" onclick="switchToSignup()" class="switch-btn">Sign up</button></p>
-        </div>
       </div>
-      <div id="signupForm" class="auth-form">
-        <div class="auth-form-header">
-          <h3>Create Account</h3>
-          <p>Join the community</p>
-        </div>
-        <form class="auth-inputs" id="signupFormElement">
-          <div class="input-group">
-            <input type="text" id="signupName" placeholder="Name" required>
-            <span class="input-icon">👤</span>
-          </div>
-          <div class="input-group">
-            <input type="email" id="signupEmail" placeholder="Email" required>
-            <span class="input-icon">📧</span>
-          </div>
-          <div class="input-group">
-            <input type="password" id="signupPassword" placeholder="Password" required>
-            <span class="input-icon">🔒</span>
-          </div>
-          <button type="submit" class="auth-submit-btn">Create Account</button>
+      <div class="modal-footer"><button type="button" class="btn btn-secondary" onclick="closeReportModal()">Cancel</button><button type="button" class="btn btn-primary orange" id="submitReportBtn" onclick="submitReport()">📤 Submit Report</button></div>
+    </div>
+  </div>
+  <!-- TRAIL SAVE MODAL -->
+  <div class="modal-overlay" id="trailSaveModal">
+    <div class="modal-container">
+      <div class="modal-header"><h2>🥾 Save Trail</h2><button class="modal-close" onclick="closeTrailSaveModal()">×</button></div>
+      <div class="modal-body">
+        <div style="background:var(--bg-secondary);border-radius:12px;padding:16px;margin-bottom:20px;display:flex;justify-content:space-around;text-align:center"><div><div style="font-size:1.5rem;font-weight:700;color:var(--accent-trails)" id="trailDistance">0.00</div><div style="font-size:.75rem;color:var(--text-muted)">km</div></div><div><div style="font-size:1.5rem;font-weight:700;color:var(--accent-trails)" id="trailDuration">00:00</div><div style="font-size:.75rem;color:var(--text-muted)">time</div></div><div><div style="font-size:1.5rem;font-weight:700;color:var(--accent-trails)" id="trailPoints">0</div><div style="font-size:.75rem;color:var(--text-muted)">points</div></div></div>
+        <form id="trailForm">
+          <div class="form-group"><label class="form-label" for="trailName">📝 Trail Name *</label><input type="text" class="form-input" id="trailName" placeholder="e.g., Yarkon Park Loop" required></div>
+          <div class="form-group"><label class="form-label" for="trailDescription">📄 Description</label><textarea class="form-textarea" id="trailDescription" placeholder="Describe the trail..."></textarea></div>
+          <div class="form-group"><label class="form-label">♿ Overall Accessibility</label><p class="form-hint">How accessible is this trail?</p><div class="rating-buttons" id="accessibilityRating"><div class="rating-btn" data-value="excellent" onclick="selectRating(this)"><div class="rating-btn-icon">✅</div><div class="rating-btn-label">Excellent</div></div><div class="rating-btn selected" data-value="good" onclick="selectRating(this)"><div class="rating-btn-icon">👍</div><div class="rating-btn-label">Good</div></div><div class="rating-btn" data-value="moderate" onclick="selectRating(this)"><div class="rating-btn-icon">⚠️</div><div class="rating-btn-label">Moderate</div></div><div class="rating-btn" data-value="challenging" onclick="selectRating(this)"><div class="rating-btn-icon">🔴</div><div class="rating-btn-label">Challenging</div></div></div></div>
+          <div class="form-group"><label class="form-label" for="surfaceType">🛤️ Primary Surface</label><select class="form-select" id="surfaceType"><option value="paved">Paved / Concrete</option><option value="asphalt">Asphalt</option><option value="boardwalk">Boardwalk</option><option value="compacted_gravel">Compacted Gravel</option><option value="dirt">Dirt / Natural</option><option value="mixed">Mixed Surfaces</option></select></div>
+          <div class="form-group"><label class="form-label" for="trailWidth">📏 Trail Width</label><select class="form-select" id="trailWidth"><option value="wide">Wide (2+ meters)</option><option value="standard">Standard (1.5-2m)</option><option value="narrow">Narrow (1-1.5m)</option><option value="very_narrow">Very Narrow (&lt;1m)</option></select></div>
+          <div class="form-group"><label class="toggle-option" style="max-width:100%"><input type="checkbox" id="makePublic" checked><span class="toggle-option-icon">🌍</span><div><div class="toggle-option-text">Share with Community</div><div class="toggle-option-desc">Make this trail visible to others</div></div></label></div>
+          <div class="form-group"><label class="form-label">📷 Trail Photos</label><input type="file" id="trailPhotos" accept="image/*" multiple hidden><button type="button" class="btn btn-secondary" onclick="document.getElementById('trailPhotos').click()">📸 Add Photos</button><div class="photo-grid" id="trailPhotoGrid"></div></div>
         </form>
-        <div class="auth-switch">
-          <p>Have account? <button type="button" onclick="switchToLogin()" class="switch-btn">Sign in</button></p>
-        </div>
+      </div>
+      <div class="modal-footer"><button type="button" class="btn btn-secondary" onclick="closeTrailSaveModal()">Discard</button><button type="button" class="btn btn-primary" id="saveTrailBtn" onclick="saveTrail()">💾 Save Trail</button></div>
+    </div>
+  </div>
+  <!-- AUTH MODAL -->
+  <div class="modal-overlay" id="authModal">
+    <div class="modal-container" style="max-width:400px">
+      <div class="modal-header"><h2>Welcome</h2><button class="modal-close" onclick="closeAuthModal()">×</button></div>
+      <div class="modal-body">
+        <div id="loginView"><p style="text-align:center;margin-bottom:24px;color:var(--text-secondary)">Sign in to save trails and reports</p><form id="loginFormElement" onsubmit="handleLogin(event)"><div class="form-group"><input type="email" class="form-input" id="loginEmail" placeholder="Email address" required></div><div class="form-group"><input type="password" class="form-input" id="loginPassword" placeholder="Password" required></div><button type="submit" class="btn btn-primary" style="width:100%">Sign In</button></form><p style="text-align:center;margin-top:20px;color:var(--text-muted)">No account? <button type="button" onclick="showSignup()" style="background:none;border:none;color:var(--accent-trails);cursor:pointer;font-weight:600">Sign up</button></p></div>
+        <div id="signupView" style="display:none"><p style="text-align:center;margin-bottom:24px;color:var(--text-secondary)">Create your account</p><form id="signupFormElement" onsubmit="handleSignup(event)"><div class="form-group"><input type="text" class="form-input" id="signupName" placeholder="Your name" required></div><div class="form-group"><input type="email" class="form-input" id="signupEmail" placeholder="Email address" required></div><div class="form-group"><input type="password" class="form-input" id="signupPassword" placeholder="Create password" required></div><button type="submit" class="btn btn-primary" style="width:100%">Create Account</button></form><p style="text-align:center;margin-top:20px;color:var(--text-muted)">Have account? <button type="button" onclick="showLogin()" style="background:none;border:none;color:var(--accent-trails);cursor:pointer;font-weight:600">Sign in</button></p></div>
       </div>
     </div>
   </div>
-  
-  <!-- Scripts -->
   <script src="https://unpkg.com/leaflet@1.9.3/dist/leaflet.js"></script>
-  
-  <script>
-    // STATE
-    let map, userMarker;
-    let currentMode = 'trails';
-    let isTracking = false, isPaused = false;
-    let trackingPath = [], trackingPolyline;
-    let watchId = null, startTime = null, pausedTime = 0, timerInterval = null;
-    let reportMarkers = [], trailMarkers = [];
-    
-    // INIT
-    document.addEventListener('DOMContentLoaded', () => {
-      initMap();
-      locateUser();
-      
-      const urlParams = new URLSearchParams(window.location.search);
-      if (urlParams.get('mode') === 'urban') setMode('urban');
-      
-      document.querySelectorAll('.filter-pill').forEach(pill => {
-        pill.addEventListener('click', () => {
-          document.querySelectorAll('.filter-pill').forEach(p => p.classList.remove('active'));
-          pill.classList.add('active');
-          filterReports(pill.dataset.filter);
-        });
-      });
-    });
-    
-    function initMap() {
-      map = L.map('map', { zoomControl: false }).setView([32.0853, 34.7818], 15);
-      L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
-        attribution: '© OpenStreetMap',
-        maxZoom: 19
-      }).addTo(map);
-    }
-    
-    // MODE
-    function setMode(mode) {
-      currentMode = mode;
-      document.getElementById('trailsModeBtn').classList.toggle('active', mode === 'trails');
-      document.getElementById('urbanModeBtn').classList.toggle('active', mode === 'urban');
-      document.getElementById('trailsLayer').classList.toggle('hidden', mode !== 'trails');
-      document.getElementById('urbanLayer').classList.toggle('hidden', mode !== 'urban');
-      
-      if (mode === 'trails') { loadTrails(); clearReportMarkers(); }
-      else { loadReports(); clearTrailMarkers(); }
-      
-      const url = new URL(window.location);
-      url.searchParams.set('mode', mode);
-      window.history.replaceState({}, '', url);
-      showToast(`${mode === 'trails' ? 'Trails' : 'Urban'} mode`);
-    }
-    
-    // LOCATION
-    function locateUser() {
-      const btn = document.getElementById('locateBtn');
-      btn.classList.add('active');
-      
-      navigator.geolocation?.getCurrentPosition(
-        (pos) => {
-          const { latitude, longitude } = pos.coords;
-          map.setView([latitude, longitude], 16);
-          if (userMarker) userMarker.setLatLng([latitude, longitude]);
-          else {
-            userMarker = L.marker([latitude, longitude], {
-              icon: L.divIcon({ className: 'user-marker', iconSize: [20, 20], iconAnchor: [10, 10] })
-            }).addTo(map);
-          }
-          btn.classList.remove('active');
-        },
-        () => { showToast('Location error', 'error'); btn.classList.remove('active'); },
-        { enableHighAccuracy: true }
-      );
-    }
-    
-    function zoomIn() { map.zoomIn(); }
-    function zoomOut() { map.zoomOut(); }
-    
-    // TRACKING
-    function startTracking() {
-      if (isTracking) return;
-      isTracking = true;
-      trackingPath = [];
-      startTime = Date.now();
-      pausedTime = 0;
-      
-      document.getElementById('trailsFab').classList.add('hidden');
-      document.getElementById('trackingStatus').classList.remove('hidden');
-      document.getElementById('trackingControls').classList.remove('hidden');
-      
-      watchId = navigator.geolocation.watchPosition(
-        (pos) => {
-          if (isPaused) return;
-          const point = [pos.coords.latitude, pos.coords.longitude];
-          trackingPath.push(point);
-          userMarker?.setLatLng(point);
-          map.panTo(point);
-          
-          if (trackingPolyline) trackingPolyline.setLatLngs(trackingPath);
-          else trackingPolyline = L.polyline(trackingPath, { color: '#4CAF50', weight: 4 }).addTo(map);
-          
-          updateStats(pos.coords.speed);
-        },
-        (err) => showToast('GPS error', 'error'),
-        { enableHighAccuracy: true, maximumAge: 0 }
-      );
-      
-      timerInterval = setInterval(updateTimer, 1000);
-      showToast('Recording started', 'success');
-    }
-    
-    function pauseTracking() {
-      isPaused = !isPaused;
-      document.querySelector('.tracking-btn.pause').innerHTML = isPaused ? '▶️' : '⏸️';
-      if (isPaused) { pausedTime += Date.now() - startTime; showToast('Paused'); }
-      else { startTime = Date.now(); showToast('Resumed'); }
-    }
-    
-    function stopTracking() {
-      isTracking = false;
-      if (watchId) navigator.geolocation.clearWatch(watchId);
-      if (timerInterval) clearInterval(timerInterval);
-      
-      document.getElementById('trailsFab').classList.remove('hidden');
-      document.getElementById('trackingStatus').classList.add('hidden');
-      document.getElementById('trackingControls').classList.add('hidden');
-      
-      const dist = calculateDistance();
-      showToast(`Trail: ${dist.toFixed(2)} km`, 'success');
-    }
-    
-    function updateStats(speed) {
-      document.getElementById('distanceValue').textContent = calculateDistance().toFixed(2);
-      document.getElementById('speedValue').textContent = speed ? (speed * 3.6).toFixed(1) : '0.0';
-    }
-    
-    function updateTimer() {
-      if (!startTime || isPaused) return;
-      const elapsed = pausedTime + (Date.now() - startTime);
-      const mins = Math.floor(elapsed / 60000);
-      const secs = Math.floor((elapsed % 60000) / 1000);
-      document.getElementById('durationValue').textContent = 
-        `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
-    }
-    
-    function calculateDistance() {
-      let dist = 0;
-      for (let i = 1; i < trackingPath.length; i++) {
-        dist += map.distance(trackingPath[i-1], trackingPath[i]);
-      }
-      return dist / 1000;
-    }
-    
-    // TRAILS
-    function loadTrails() {
-      clearTrailMarkers();
-      [[32.0853, 34.7818, 'Beach Trail'], [32.0900, 34.7750, 'Yarkon Loop']].forEach(([lat, lng, name]) => {
-        const m = L.marker([lat, lng], {
-          icon: L.divIcon({ className: 'trail-marker', iconSize: [16, 16], iconAnchor: [8, 8] })
-        }).addTo(map).bindPopup(`<b>${name}</b>`);
-        trailMarkers.push(m);
-      });
-    }
-    
-    function clearTrailMarkers() { trailMarkers.forEach(m => map.removeLayer(m)); trailMarkers = []; }
-    
-    // REPORTS
-    function loadReports() {
-      clearReportMarkers();
-      const icons = { barrier: '🚧', hazard: '⚠️', parking: '♿', ramp: '🔼' };
-      [
-        [32.0860, 34.7810, 'barrier', 'Blocked sidewalk'],
-        [32.0845, 34.7830, 'hazard', 'Broken curb'],
-        [32.0870, 34.7800, 'parking', 'Accessible spot']
-      ].forEach(([lat, lng, type, title]) => {
-        const m = L.marker([lat, lng], {
-          icon: L.divIcon({
-            html: `<div class="report-marker">${icons[type]}</div>`,
-            className: '',
-            iconSize: [32, 32],
-            iconAnchor: [16, 16]
-          })
-        }).addTo(map).bindPopup(`<b>${title}</b>`);
-        m.reportType = type;
-        reportMarkers.push(m);
-      });
-    }
-    
-    function clearReportMarkers() { reportMarkers.forEach(m => map.removeLayer(m)); reportMarkers = []; }
-    
-    function filterReports(filter) {
-      reportMarkers.forEach(m => {
-        if (filter === 'all' || m.reportType === filter) m.addTo(map);
-        else map.removeLayer(m);
-      });
-    }
-    
-    function openReportModal() { showToast('Report form coming soon'); }
-    
-    // TOAST
-    function showToast(msg, type = '') {
-      const t = document.getElementById('toast');
-      t.textContent = msg;
-      t.className = 'toast show ' + type;
-      setTimeout(() => t.classList.remove('show'), 3000);
-    }
-    
-    // AUTH
-    function closeAuthModal() { document.getElementById('authModal').classList.add('hidden'); }
-    function switchToSignup() { document.getElementById('loginForm').classList.remove('active'); document.getElementById('signupForm').classList.add('active'); }
-    function switchToLogin() { document.getElementById('signupForm').classList.remove('active'); document.getElementById('loginForm').classList.add('active'); }
-    window.openAuthModal = () => document.getElementById('authModal').classList.remove('hidden');
-  </script>
-  
-  <!-- Bottom Nav -->
   <script type="module">
-    import { initGlobalNav } from './src/components/globalNav.js';
-    initGlobalNav({ currentPage: 'map' });
+    import { initializeApp, getApps, getApp } from "https://www.gstatic.com/firebasejs/10.5.0/firebase-app.js";
+    import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, createUserWithEmailAndPassword, signInAnonymously, updateProfile } from "https://www.gstatic.com/firebasejs/10.5.0/firebase-auth.js";
+    import { getFirestore, collection, query, where, getDocs, addDoc, doc, getDoc, orderBy, limit, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.5.0/firebase-firestore.js";
+    import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.5.0/firebase-storage.js";
+    const firebaseConfig={apiKey:"AIzaSyAmsm916Lzp0MUXANq3SECO4ec7q1H0Vu4",authDomain:"accessnaturebeta-821a2.firebaseapp.com",projectId:"accessnaturebeta-821a2",storageBucket:"accessnaturebeta-821a2.appspot.com",messagingSenderId:"670888101781",appId:"1:670888101781:web:b4cf57f58e86182466589c"};
+    let app=getApps().length===0?initializeApp(firebaseConfig):getApp();const auth=getAuth(app);const db=getFirestore(app);const storage=getStorage(app);
+    window.auth=auth;window.db=db;window.storage=storage;window.firebaseModules={collection,query,where,getDocs,addDoc,doc,getDoc,orderBy,limit,serverTimestamp,ref,uploadBytes,getDownloadURL};
+    onAuthStateChanged(auth,(user)=>{window.currentUser=user;if(user){console.log('✅ User signed in:',user.email||'Anonymous');window.dispatchEvent(new CustomEvent('authStateChanged',{detail:{user}}));}else{console.log('👤 No user signed in');signInAnonymously(auth).catch(console.error);}});
+    window.handleLogin=async(e)=>{e.preventDefault();const email=document.getElementById('loginEmail').value;const password=document.getElementById('loginPassword').value;try{await signInWithEmailAndPassword(auth,email,password);closeAuthModal();showToast('Signed in successfully','success');}catch(error){showToast(error.message,'error');}};
+    window.handleSignup=async(e)=>{e.preventDefault();const name=document.getElementById('signupName').value;const email=document.getElementById('signupEmail').value;const password=document.getElementById('signupPassword').value;try{const result=await createUserWithEmailAndPassword(auth,email,password);await updateProfile(result.user,{displayName:name});closeAuthModal();showToast('Account created!','success');}catch(error){showToast(error.message,'error');}};
+    window.showLogin=()=>{document.getElementById('loginView').style.display='block';document.getElementById('signupView').style.display='none';};
+    window.showSignup=()=>{document.getElementById('loginView').style.display='none';document.getElementById('signupView').style.display='block';};
+    setTimeout(()=>{if(window.currentMode==='trails')loadTrailsFromFirebase();else loadReportsFromFirebase();document.getElementById('loadingOverlay').classList.add('hidden');},1500);
   </script>
+  <script>
+    let map,userMarker;let currentMode='trails';window.currentMode=currentMode;let isTracking=false,isPaused=false;let trackingPath=[],trackingPolyline;let watchId=null,startTime=null,pausedTime=0,timerInterval=null;let reportMarkers=[],trailMarkers=[];let reportPickerMap=null,reportPickerMarker=null;let pendingPhotos={report:[],trail:[]};let isDarkMap=true;
+    const TILES={dark:'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',light:'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png'};let currentTileLayer;
+    document.addEventListener('DOMContentLoaded',()=>{initMap();locateUser();setupEventListeners();const urlParams=new URLSearchParams(window.location.search);if(urlParams.get('mode')==='urban')setMode('urban');});
+    function initMap(){map=L.map('map',{zoomControl:false}).setView([32.0853,34.7818],15);currentTileLayer=L.tileLayer(TILES.dark,{attribution:'© OpenStreetMap',maxZoom:19}).addTo(map);console.log('[Map] Initialized');}
+    function setupEventListeners(){document.querySelectorAll('.severity-option').forEach(opt=>{opt.addEventListener('click',()=>{document.querySelectorAll('.severity-option').forEach(o=>o.classList.remove('selected'));opt.classList.add('selected');opt.querySelector('input').checked=true;});});document.querySelectorAll('.toggle-option').forEach(opt=>{opt.addEventListener('click',()=>{const group=opt.closest('.toggle-options');if(group){group.querySelectorAll('.toggle-option').forEach(o=>o.classList.remove('selected'));}opt.classList.add('selected');opt.querySelector('input').checked=true;});});document.querySelectorAll('.filter-pill').forEach(pill=>{pill.addEventListener('click',()=>{document.querySelectorAll('.filter-pill').forEach(p=>p.classList.remove('active'));pill.classList.add('active');filterReports(pill.dataset.filter);});});document.getElementById('reportPhotos').addEventListener('change',(e)=>handlePhotos(e,'report'));document.getElementById('trailPhotos').addEventListener('change',(e)=>handlePhotos(e,'trail'));}
+    function setMode(mode){currentMode=mode;window.currentMode=mode;document.getElementById('trailsModeBtn').classList.toggle('active',mode==='trails');document.getElementById('urbanModeBtn').classList.toggle('active',mode==='urban');document.getElementById('trailsLayer').classList.toggle('hidden',mode!=='trails');document.getElementById('urbanLayer').classList.toggle('hidden',mode!=='urban');if(mode==='trails'){loadTrailsFromFirebase();clearReportMarkers();}else{loadReportsFromFirebase();clearTrailMarkers();}const url=new URL(window.location);url.searchParams.set('mode',mode);window.history.replaceState({},'',url);showToast(`${mode==='trails'?'Trails':'Urban'} mode`);}
+    function zoomIn(){map.zoomIn();}function zoomOut(){map.zoomOut();}
+    function toggleMapStyle(){isDarkMap=!isDarkMap;map.removeLayer(currentTileLayer);currentTileLayer=L.tileLayer(isDarkMap?TILES.dark:TILES.light,{attribution:'© OpenStreetMap',maxZoom:19}).addTo(map);showToast(isDarkMap?'Dark map':'Light map');}
+    function locateUser(){const btn=document.getElementById('locateBtn');btn.classList.add('active');navigator.geolocation?.getCurrentPosition((pos)=>{const{latitude,longitude}=pos.coords;map.setView([latitude,longitude],16);if(userMarker)userMarker.setLatLng([latitude,longitude]);else{userMarker=L.marker([latitude,longitude],{icon:L.divIcon({className:'user-marker',iconSize:[20,20],iconAnchor:[10,10]})}).addTo(map);}btn.classList.remove('active');},()=>{showToast('Location error','error');btn.classList.remove('active');},{enableHighAccuracy:true});}
+    function startTracking(){if(isTracking)return;isTracking=true;trackingPath=[];startTime=Date.now();pausedTime=0;document.getElementById('trailsFab').classList.add('hidden');document.getElementById('trackingStatus').classList.remove('hidden');document.getElementById('trackingControls').classList.remove('hidden');watchId=navigator.geolocation.watchPosition((pos)=>{if(isPaused)return;const point=[pos.coords.latitude,pos.coords.longitude];trackingPath.push({lat:point[0],lng:point[1],timestamp:Date.now(),accuracy:pos.coords.accuracy});userMarker?.setLatLng(point);map.panTo(point);if(trackingPolyline)trackingPolyline.setLatLngs(trackingPath.map(p=>[p.lat,p.lng]));else trackingPolyline=L.polyline(trackingPath.map(p=>[p.lat,p.lng]),{color:'#4CAF50',weight:4}).addTo(map);updateStats(pos.coords.speed);},(err)=>showToast('GPS error','error'),{enableHighAccuracy:true,maximumAge:0});timerInterval=setInterval(updateTimer,1000);showToast('Recording started','success');}
+    function pauseTracking(){isPaused=!isPaused;document.getElementById('pauseBtn').innerHTML=isPaused?'▶️':'⏸️';if(isPaused){pausedTime+=Date.now()-startTime;showToast('Paused');}else{startTime=Date.now();showToast('Resumed');}}
+    function stopTracking(){isTracking=false;if(watchId)navigator.geolocation.clearWatch(watchId);if(timerInterval)clearInterval(timerInterval);document.getElementById('trackingStatus').classList.add('hidden');document.getElementById('trackingControls').classList.add('hidden');openTrailSaveModal();}
+    function updateStats(speed){document.getElementById('distanceValue').textContent=calculateDistance().toFixed(2);document.getElementById('speedValue').textContent=speed?(speed*3.6).toFixed(1):'0.0';}
+    function updateTimer(){if(!startTime||isPaused)return;const elapsed=pausedTime+(Date.now()-startTime);document.getElementById('durationValue').textContent=formatDuration(elapsed);}
+    function calculateDistance(){let dist=0;for(let i=1;i<trackingPath.length;i++){dist+=map.distance([trackingPath[i-1].lat,trackingPath[i-1].lng],[trackingPath[i].lat,trackingPath[i].lng]);}return dist/1000;}
+    function formatDuration(ms){const mins=Math.floor(ms/60000);const secs=Math.floor((ms%60000)/1000);return `${mins.toString().padStart(2,'0')}:${secs.toString().padStart(2,'0')}`;}
+    async function loadTrailsFromFirebase(){if(!window.db)return;try{const{collection,query,where,getDocs,limit}=window.firebaseModules;const q=query(collection(window.db,'trail_guides'),where('isPublic','==',true),limit(50));const snapshot=await getDocs(q);clearTrailMarkers();snapshot.forEach(doc=>{const data=doc.data();if(data.startPoint){const lat=data.startPoint.latitude||data.startPoint.lat;const lng=data.startPoint.longitude||data.startPoint.lng;if(lat&&lng){const marker=L.marker([lat,lng],{icon:L.divIcon({className:'trail-marker',iconSize:[16,16],iconAnchor:[8,8]})}).addTo(map);const distance=data.totalDistance?(data.totalDistance/1000).toFixed(1):'?';const popup=`<div class="trail-popup"><h3>${data.trailName||'Unnamed Trail'}</h3><div class="trail-popup-stats"><span>📏 ${distance} km</span><span>♿ ${data.overallRating||'N/A'}</span></div><button class="trail-popup-btn" onclick="viewTrail('${doc.id}')">View Details</button></div>`;marker.bindPopup(popup);trailMarkers.push(marker);}}});console.log(`[Trails] Loaded ${trailMarkers.length} trails`);}catch(error){console.error('[Trails] Load error:',error);}}
+    async function loadReportsFromFirebase(){if(!window.db)return;try{const{collection,query,getDocs,limit,orderBy}=window.firebaseModules;const q=query(collection(window.db,'accessibility_reports'),orderBy('createdAt','desc'),limit(100));const snapshot=await getDocs(q);clearReportMarkers();const typeIcons={curb_ramp:'🚧',sidewalk_blocked:'⛔',damaged_sidewalk:'💔',inaccessible_entrance:'🚪',broken_elevator:'🛗',parking_blocked:'🅿️',bus_stop:'🚌',other:'📍'};const typeCategories={curb_ramp:'sidewalk',sidewalk_blocked:'sidewalk',damaged_sidewalk:'sidewalk',tactile_paving:'sidewalk',inaccessible_entrance:'building',broken_elevator:'building',heavy_doors:'building',stairs_only:'building',parking_blocked:'parking',no_parking:'parking',bus_stop:'transit',transit_station:'transit'};snapshot.forEach(doc=>{const data=doc.data();if(data.location){const lat=data.location.latitude||data.location.lat;const lng=data.location.longitude||data.location.lng;if(lat&&lng){const icon=typeIcons[data.issueType]||'📍';const marker=L.marker([lat,lng],{icon:L.divIcon({html:`<div class="report-marker">${icon}</div>`,className:'',iconSize:[32,32],iconAnchor:[16,16]})}).addTo(map);marker.bindPopup(`<b>${data.title||'Report'}</b><br>${data.issueType}`);marker.reportType=data.issueType;marker.category=typeCategories[data.issueType]||'other';reportMarkers.push(marker);}}});console.log(`[Reports] Loaded ${reportMarkers.length} reports`);}catch(error){console.error('[Reports] Load error:',error);}}
+    function clearTrailMarkers(){trailMarkers.forEach(m=>map.removeLayer(m));trailMarkers=[];}function clearReportMarkers(){reportMarkers.forEach(m=>map.removeLayer(m));reportMarkers=[];}
+    function filterReports(filter){reportMarkers.forEach(m=>{if(filter==='all'||m.category===filter)m.addTo(map);else map.removeLayer(m);});}
+    function viewTrail(id){showToast('Trail details coming soon');}
+    function openReportModal(){document.getElementById('reportModal').classList.add('open');setTimeout(()=>{if(!reportPickerMap){reportPickerMap=L.map('reportMapPicker',{zoomControl:false}).setView(map.getCenter(),16);L.tileLayer(TILES.dark,{maxZoom:19}).addTo(reportPickerMap);reportPickerMap.on('click',(e)=>{setReportLocation(e.latlng.lat,e.latlng.lng);});}else{reportPickerMap.setView(map.getCenter(),16);}if(userMarker){const pos=userMarker.getLatLng();setReportLocation(pos.lat,pos.lng);}reportPickerMap.invalidateSize();},300);}
+    function setReportLocation(lat,lng){document.getElementById('reportLat').value=lat;document.getElementById('reportLng').value=lng;document.getElementById('reportLocationText').textContent=`${lat.toFixed(5)}, ${lng.toFixed(5)}`;if(reportPickerMarker){reportPickerMarker.setLatLng([lat,lng]);}else{reportPickerMarker=L.marker([lat,lng]).addTo(reportPickerMap);}}
+    function closeReportModal(){document.getElementById('reportModal').classList.remove('open');}
+    async function submitReport(){const btn=document.getElementById('submitReportBtn');btn.disabled=true;btn.innerHTML='<div class="spinner"></div> Submitting...';try{const lat=parseFloat(document.getElementById('reportLat').value);const lng=parseFloat(document.getElementById('reportLng').value);const issueType=document.getElementById('reportType').value;const title=document.getElementById('reportTitle').value;const description=document.getElementById('reportDescription').value;const severity=document.querySelector('input[name="severity"]:checked')?.value||3;const duration=document.querySelector('input[name="duration"]:checked')?.value||'permanent';if(!lat||!lng||!issueType||!title){throw new Error('Please fill in all required fields');}const{collection,addDoc,serverTimestamp}=window.firebaseModules;const report={location:{latitude:lat,longitude:lng},issueType,title,description,severity:parseInt(severity),durationType:duration,status:'new',createdAt:serverTimestamp(),userId:window.currentUser?.uid||'anonymous',userEmail:window.currentUser?.email||null};await addDoc(collection(window.db,'accessibility_reports'),report);closeReportModal();showToast('Report submitted!','success');loadReportsFromFirebase();document.getElementById('reportForm').reset();pendingPhotos.report=[];document.getElementById('reportPhotoGrid').innerHTML='';}catch(error){showToast(error.message,'error');}finally{btn.disabled=false;btn.innerHTML='📤 Submit Report';}}
+    function openTrailSaveModal(){const dist=calculateDistance();const duration=pausedTime+(startTime?Date.now()-startTime:0);document.getElementById('trailDistance').textContent=dist.toFixed(2);document.getElementById('trailDuration').textContent=formatDuration(duration);document.getElementById('trailPoints').textContent=trackingPath.length;document.getElementById('trailSaveModal').classList.add('open');}
+    function closeTrailSaveModal(){document.getElementById('trailSaveModal').classList.remove('open');document.getElementById('trailsFab').classList.remove('hidden');if(trackingPolyline){map.removeLayer(trackingPolyline);trackingPolyline=null;}trackingPath=[];}
+    function selectRating(el){document.querySelectorAll('.rating-btn').forEach(b=>b.classList.remove('selected'));el.classList.add('selected');}
+    async function saveTrail(){const btn=document.getElementById('saveTrailBtn');btn.disabled=true;btn.innerHTML='<div class="spinner"></div> Saving...';try{const name=document.getElementById('trailName').value;if(!name)throw new Error('Please enter a trail name');const description=document.getElementById('trailDescription').value;const rating=document.querySelector('.rating-btn.selected')?.dataset.value||'good';const surface=document.getElementById('surfaceType').value;const width=document.getElementById('trailWidth').value;const isPublic=document.getElementById('makePublic').checked;const distance=calculateDistance();const duration=pausedTime+(startTime?Date.now()-startTime:0);const{collection,addDoc,serverTimestamp}=window.firebaseModules;const trail={trailName:name,description,overallRating:rating,surfaceType:surface,pathWidth:width,isPublic,totalDistance:distance*1000,totalDuration:duration,trackPoints:trackingPath,startPoint:trackingPath.length>0?{latitude:trackingPath[0].lat,longitude:trackingPath[0].lng}:null,endPoint:trackingPath.length>0?{latitude:trackingPath[trackingPath.length-1].lat,longitude:trackingPath[trackingPath.length-1].lng}:null,createdAt:serverTimestamp(),userId:window.currentUser?.uid||'anonymous',userEmail:window.currentUser?.email||null};await addDoc(collection(window.db,'trail_guides'),trail);closeTrailSaveModal();showToast('Trail saved!','success');loadTrailsFromFirebase();document.getElementById('trailForm').reset();pendingPhotos.trail=[];document.getElementById('trailPhotoGrid').innerHTML='';}catch(error){showToast(error.message,'error');}finally{btn.disabled=false;btn.innerHTML='💾 Save Trail';}}
+    function handlePhotos(e,type){const files=Array.from(e.target.files);const grid=document.getElementById(type==='report'?'reportPhotoGrid':'trailPhotoGrid');files.forEach((file,i)=>{const reader=new FileReader();reader.onload=(e)=>{pendingPhotos[type].push(file);const idx=pendingPhotos[type].length-1;const div=document.createElement('div');div.className='photo-preview';div.innerHTML=`<img src="${e.target.result}" alt="Photo ${idx+1}"><button class="remove-photo" onclick="removePhoto('${type}',${idx},this)">×</button>`;grid.appendChild(div);};reader.readAsDataURL(file);});}
+    window.removePhoto=function(type,idx,btn){pendingPhotos[type].splice(idx,1);btn.parentElement.remove();};
+    window.openAuthModal=function(){document.getElementById('authModal').classList.add('open');};window.closeAuthModal=function(){document.getElementById('authModal').classList.remove('open');};
+    function showToast(msg,type=''){const t=document.getElementById('toast');t.textContent=msg;t.className='toast show '+type;setTimeout(()=>t.classList.remove('show'),3000);}window.showToast=showToast;
+    window.setMode=setMode;window.zoomIn=zoomIn;window.zoomOut=zoomOut;window.toggleMapStyle=toggleMapStyle;window.locateUser=locateUser;window.startTracking=startTracking;window.pauseTracking=pauseTracking;window.stopTracking=stopTracking;window.openReportModal=openReportModal;window.closeReportModal=closeReportModal;window.submitReport=submitReport;window.openTrailSaveModal=openTrailSaveModal;window.closeTrailSaveModal=closeTrailSaveModal;window.selectRating=selectRating;window.saveTrail=saveTrail;window.viewTrail=viewTrail;window.filterReports=filterReports;window.loadTrailsFromFirebase=loadTrailsFromFirebase;window.loadReportsFromFirebase=loadReportsFromFirebase;
+  </script>
+  <script type="module">import{initGlobalNav}from'./src/components/globalNav.js';initGlobalNav({currentPage:'map'});</script>
 </body>
 </html>
